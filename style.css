@@ -154,7 +154,7 @@ body.editing .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2p
 .currency-rate { font-family: 'Inter', 'SF Mono', 'Consolas', monospace; font-weight: 600; color: var(--text); }
 .currency-date { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
 
-.radio-section { grid-column: span 1; min-width: auto; }
+.radio-section { grid-column: span 1; min-width: auto; backdrop-filter: blur(10px); }
 .radio-player { display: flex; flex-direction: column; align-items: center; gap: 12px; flex: 1; justify-content: center; }
 .radio-station-name { font-size: 0.95rem; font-weight: 600; color: var(--text); text-align: center; }
 .radio-controls { display: flex; align-items: center; gap: 12px; }
@@ -170,13 +170,16 @@ body.editing .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2p
 .radio-volume input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer; }
 .radio-equalizer { display: flex; align-items: flex-end; gap: 3px; height: 20px; opacity: 0; transition: opacity 0.3s; }
 .radio-equalizer.active { opacity: 1; }
-.radio-equalizer span { width: 3px; background: var(--accent); border-radius: 1px; animation: eq 0.8s ease-in-out infinite alternate; }
-.radio-equalizer span:nth-child(1) { height: 40%; animation-delay: 0s; }
-.radio-equalizer span:nth-child(2) { height: 70%; animation-delay: 0.2s; }
-.radio-equalizer span:nth-child(3) { height: 50%; animation-delay: 0.4s; }
-.radio-equalizer span:nth-child(4) { height: 80%; animation-delay: 0.1s; }
-.radio-equalizer span:nth-child(5) { height: 30%; animation-delay: 0.3s; }
-@keyframes eq { 0% { height: 20%; } 100% { height: 100%; } }
+/* ✔ ИЗМЕНЕНО: статичный эквалайзер — БЕЗ анимации вообще (тест нагрузки).
+   Столбики фиксированной высоты просто «загораются» при воспроизведении.
+   Если нагрузка исчезнет — значит, дело было в анимации (даже на transform). */
+.radio-equalizer span { width: 3px; background: var(--accent); border-radius: 1px; }
+/* Фиксированные высоты столбиков — разнобой, как у застывшего эквалайзера */
+.radio-equalizer span:nth-child(1) { height: 40%; }
+.radio-equalizer span:nth-child(2) { height: 70%; }
+.radio-equalizer span:nth-child(3) { height: 100%; }
+.radio-equalizer span:nth-child(4) { height: 55%; }
+.radio-equalizer span:nth-child(5) { height: 80%; }
 .radio-error { font-size: 0.8rem; color: var(--danger); text-align: center; display: none; }
 
 .notes-section { grid-column: span 2; min-width: auto; }
@@ -301,7 +304,9 @@ body.eco-active *:active {
 }
 
 /* ✔ ИСПРАВЛЕНО: animation-play-state вместо animation: none
-   — анимация замирает на паузе и корректно возобновляется при снятии eco-режима */
+   — анимация замирает на паузе и корректно возобновляется при снятии eco-режима.
+   Примечание: при статичном эквалайзере это правило временно не работает
+   (анимации нет), но станет актуально, если вернём анимацию. */
 body.eco-active .radio-equalizer span { animation-play-state: paused; }
 
 @media (max-width: 850px) {
