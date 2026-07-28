@@ -249,6 +249,11 @@ footer { text-align: center; margin-top: 40px; padding-bottom: 20px; color: var(
 .footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); }
 .footer-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
 .footer-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+/* ✔ НОВОЕ: кнопка GitHub в футере — это ссылка <a>, убираем подчёркивание */
+a.footer-btn { text-decoration: none; }
+/* ✔ НОВОЕ: логотип GitHub — сплошная иконка (fill), в отличие от контурных
+   иконок Экспорт/Импорт/Обои, поэтому переопределяем fill/stroke */
+.footer-btn-github svg { fill: currentColor; stroke: none; }
 #import-file, #bg-file { display: none; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
