@@ -172,6 +172,30 @@ mo.addEventListener('click', e => { if (e.target === mo) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && mo.classList.contains('active')) closeModal(); });
 document.getElementById('add-card-btn').addEventListener('click', () => openModal('Новая категория', 'Название', false, n => { bookmarks.push({ title: n, links: [] }); saveBookmarks(); }));
 
+// ===== ⚡ ЭКОНОМИЧНЫЙ РЕЖИМ =====
+// Ключ для сохранения состояния в localStorage
+const ECO_KEY = 'eco_mode';
+const ecoToggle = document.getElementById('eco-toggle');
+let isEcoMode = localStorage.getItem(ECO_KEY) === 'true';
+
+// Применяет экономичный режим: классы на body/кнопке, событие для других модулей
+function applyEcoMode(enabled) {
+    isEcoMode = enabled;
+    document.body.classList.toggle('eco-active', enabled);
+    ecoToggle.classList.toggle('eco-active', enabled);
+    safeSetItem(ECO_KEY, String(enabled));
+    // Генерируем событие, чтобы модули погоды/валют узнали об изменении
+    window.dispatchEvent(new CustomEvent('ecomode-changed', { detail: { enabled } }));
+}
+
+// Переключение по клику
+ecoToggle.addEventListener('click', () => {
+    applyEcoMode(!isEcoMode);
+});
+
+// Применяем сохранённое состояние при загрузке
+applyEcoMode(isEcoMode);
+
 // ===== РЕЖИМ РЕДАКТИРОВАНИЯ =====
 const et = document.getElementById('edit-toggle');
 et.addEventListener('click', () => {

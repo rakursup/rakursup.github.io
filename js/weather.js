@@ -1,10 +1,17 @@
 // ============================================================
 // ПОГОДА И ЧАСЫ — показывает время и погоду в 3 городах
 // ============================================================
-// Интервал обновления погоды (30 минут в миллисекундах)
-const WEATHER_UPDATE_INTERVAL = 30 * 60 * 1000;
+
+// ✔ ДОБАВЛЕНО: два интервала обновления — обычный и экономичный
+const WEATHER_UPDATE_NORMAL = 30 * 60 * 1000;   // 30 минут
+const WEATHER_UPDATE_ECO = 4 * 60 * 60 * 1000;  // 4 часа
+
 // Таймаут запроса: если API не ответил за 10 секунд — прерываем
 const WEATHER_FETCH_TIMEOUT = 10000;
+
+// ✔ ДОБАВЛЕНО: ключи для сохранения кэша погоды в localStorage
+const WEATHER_CACHE_KEY = 'weather_cache';
+const WEATHER_CACHE_TIME_KEY = 'weather_cache_time';
 
 // Список городов для часов (с часовыми поясами)
 const cities = [
@@ -50,6 +57,40 @@ const wCodes = {
   96: { i: '⛈️', d: 'Гроза с градом' }, 99: { i: '⛈️', d: 'Сильная гроза с градом' }
 };
 
+// ✔ ДОБАВЛЕНО: единая функция отрисовки погоды на странице
+// (используется и при загрузке кэша, и при получении свежих данных)
+function displayWeather(cityId, data) {
+    const t = Math.round(data.temperature_2m);
+    const w = Math.round(data.wind_speed_10m);
+    const h = data.relative_humidity_2m;
+    const info = wCodes[data.weather_code] || { i: '🌡️', d: 'Нет данных' };
+    document.getElementById(`weather-${cityId}`).innerHTML =
+        `<div class="weather-main"><span class="weather-icon">${info.i}</span><span class="weather-temp">${t}°C</span></div>` +
+        `<div class="weather-desc">${info.d}</div>` +
+        `<div class="weather-details"><span>💨 ${w}</span><span>💧 ${h}%</span></div>`;
+}
+
+// ✔ ДОБАВЛЕНО: мгновенно показывает сохранённую погоду из localStorage
+function loadWeatherCache() {
+    try {
+        const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+        if (cached) {
+            const data = JSON.parse(cached);
+            wCities.forEach(c => {
+                if (data[c.id]) displayWeather(c.id, data[c.id]);
+            });
+        }
+    } catch (e) {}
+}
+
+// ✔ ДОБАВЛЕНО: сохраняет полученные данные в кэш
+function saveWeatherCache(data) {
+    try {
+        safeSetItem(WEATHER_CACHE_KEY, JSON.stringify(data));
+        safeSetItem(WEATHER_CACHE_TIME_KEY, String(Date.now()));
+    } catch (e) {}
+}
+
 // Запрашивает погоду с API open-meteo.com (бесплатно, без ключа)
 async function fetchWeather(c) {
   const controller = new AbortController();
@@ -57,14 +98,51 @@ async function fetchWeather(c) {
   try {
     const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto`, { signal: controller.signal });
     const d = await r.json();
-    const t = Math.round(d.current.temperature_2m), w = Math.round(d.current.wind_speed_10m), h = d.current.relative_humidity_2m;
-    const info = wCodes[d.current.weather_code] || { i: '🌡️', d: 'Нет данных' };
-    document.getElementById(`weather-${c.id}`).innerHTML = `<div class="weather-main"><span class="weather-icon">${info.i}</span><span class="weather-temp">${t}°C</span></div><div class="weather-desc">${info.d}</div><div class="weather-details"><span>💨 ${w}</span><span>💧 ${h}%</span></div>`;
+    // ✔ ИЗМЕНЕНО: используем единую функцию отрисовки
+    displayWeather(c.id, d.current);
+    // Возвращаем данные для сохранения в кэш
+    return { id: c.id, data: d.current };
   } catch (e) {
-    document.getElementById(`weather-${c.id}`).innerHTML = '<span class="weather-loading">Нет данных</span>';
+    // Показываем ошибку только если кэша нет (чтобы не перекрывать сохранённые данные)
+    const cached = localStorage.getItem(WEATHER_CACHE_KEY);
+    if (!cached || !JSON.parse(cached)[c.id]) {
+        document.getElementById(`weather-${c.id}`).innerHTML = '<span class="weather-loading">Нет данных</span>';
+    }
+    return null;
   } finally {
     clearTimeout(timer);
   }
 }
-wCities.forEach(fetchWeather);
-setInterval(() => wCities.forEach(fetchWeather), WEATHER_UPDATE_INTERVAL);
+
+// ✔ ДОБАВЛЕНО: загружает погоду для всех городов и сохраняет в кэш
+async function fetchAllWeather() {
+    const allData = {};
+    for (const c of wCities) {
+        const result = await fetchWeather(c);
+        if (result) allData[result.id] = result.data;
+    }
+    if (Object.keys(allData).length > 0) {
+        saveWeatherCache(allData);
+    }
+}
+
+// ✔ ДОБАВЛЕНО: выбирает интервал в зависимости от экономичного режима
+function getUpdateInterval() {
+    return document.body.classList.contains('eco-active')
+        ? WEATHER_UPDATE_ECO
+        : WEATHER_UPDATE_NORMAL;
+}
+
+// ✔ ДОБАВЛЕНО: запускаем таймер с актуальным интервалом
+let weatherInterval = setInterval(fetchAllWeather, getUpdateInterval());
+
+// ✔ ДОБАВЛЕНО: слушаем переключение экономичного режима из app.js
+// и пересоздаём таймер с новым интервалом
+window.addEventListener('ecomode-changed', () => {
+    clearInterval(weatherInterval);
+    weatherInterval = setInterval(fetchAllWeather, getUpdateInterval());
+});
+
+// ✔ ИЗМЕНЕНО: сначала мгновенно показываем кэш, потом тянем актуальные данные
+loadWeatherCache();
+fetchAllWeather();

@@ -15,6 +15,20 @@ const RADIO_STATIONS = [
 ];
 let currentStation = 0, isPlaying = false, errorRetryTimer = null, consecutiveErrors = 0;
 
+// ✔ ИСПРАВЛЕНО: переименована переменная, чтобы не конфликтовать с app.js
+// в eco-режиме отключаем автопереключение станций при ошибках (экономим трафик)
+let isRadioEco = document.body.classList.contains('eco-active');
+
+// Слушаем переключение режима из app.js
+window.addEventListener('ecomode-changed', (e) => {
+    isRadioEco = e.detail.enabled;
+    // Если в eco-режиме и есть таймер переключения — отменяем его
+    if (isRadioEco && errorRetryTimer) {
+        clearTimeout(errorRetryTimer);
+        errorRetryTimer = null;
+    }
+});
+
 // DOM-элементы плеера
 const audioEl = document.getElementById('radio-audio');
 const playBtn = document.getElementById('radio-play');
@@ -107,6 +121,14 @@ function handleStreamError() {
   // Плеер без источника (ручная остановка) — не переключаем
   if (!audioEl.getAttribute('src')) return;
   consecutiveErrors++;
+
+  // ✔ В eco-режиме не переключаем автоматически (экономим трафик)
+  if (isRadioEco) {
+    showError('Поток недоступен. Переключите станцию вручную.');
+    stopRadio();
+    return;
+  }
+
   if (consecutiveErrors >= RADIO_STATIONS.length) {
     showError('Все станции недоступны');
     stopRadio();

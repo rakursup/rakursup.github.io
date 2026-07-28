@@ -1,7 +1,11 @@
 // ============================================================
 // КУРСЫ ВАЛЮТ — показывает курсы THB, CNY, USD, EUR к RUB
 // ============================================================
-const CURRENCY_UPDATE_INTERVAL = 60 * 60 * 1000; // Обновление раз в час
+
+// ✔ ИЗМЕНЕНО: два интервала обновления — обычный и экономичный
+const CURRENCY_UPDATE_NORMAL = 60 * 60 * 1000;   // 1 час
+const CURRENCY_UPDATE_ECO = 6 * 60 * 60 * 1000;  // 6 часов
+
 const CURRENCY_FETCH_TIMEOUT = 10000;            // Таймаут запроса, 10 секунд
 const CURRENCY_CACHE_KEY = 'dashboard_currency_cache'; // Кэш на случай офлайна
 
@@ -51,5 +55,22 @@ async function fetchCurrencies() {
     clearTimeout(timer);
   }
 }
+
+// ✔ ДОБАВЛЕНО: выбирает интервал в зависимости от экономичного режима
+function getCurrencyInterval() {
+    return document.body.classList.contains('eco-active')
+        ? CURRENCY_UPDATE_ECO
+        : CURRENCY_UPDATE_NORMAL;
+}
+
+// ✔ ИЗМЕНЕНО: запускаем таймер с актуальным интервалом
+let currencyInterval = setInterval(fetchCurrencies, getCurrencyInterval());
+
+// ✔ ДОБАВЛЕНО: слушаем переключение экономичного режима из app.js
+// и пересоздаём таймер с новым интервалом
+window.addEventListener('ecomode-changed', () => {
+    clearInterval(currencyInterval);
+    currencyInterval = setInterval(fetchCurrencies, getCurrencyInterval());
+});
+
 fetchCurrencies();
-setInterval(fetchCurrencies, CURRENCY_UPDATE_INTERVAL);

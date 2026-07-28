@@ -276,6 +276,29 @@ body.theme-transitioning *::before, body.theme-transitioning *::after {
                 border-color 0.35s ease, fill 0.35s ease !important;
 }
 
+/* ⚡ ЭКОНОМИЧНЫЙ РЕЖИМ — отключает анимации и эффекты для снижения нагрузки */
+/* Активное состояние кнопки (зелёная подсветка) */
+.icon-btn.eco-active { border-color: #4caf50; background: #4caf50; }
+.icon-btn.eco-active svg { fill: #fff; }
+
+/* Отключаем плавные переходы, анимации и размытие фона для всех элементов */
+body.eco-active * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    backdrop-filter: none !important;
+}
+
+/* НО сохраняем ховер-эффекты для интерактивности */
+body.eco-active *:hover,
+body.eco-active *:focus,
+body.eco-active *:active {
+    transition-duration: 0.2s !important;
+}
+
+/* ✔ ИСПРАВЛЕНО: animation-play-state вместо animation: none
+   — анимация замирает на паузе и корректно возобновляется при снятии eco-режима */
+body.eco-active .radio-equalizer span { animation-play-state: paused; }
+
 @media (max-width: 850px) {
     header { flex-wrap: wrap; justify-content: center; }
     h1 { width: 100%; text-align: center; margin-bottom: 5px; }
