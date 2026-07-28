@@ -243,7 +243,7 @@ body.editing .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2p
 
 footer { text-align: center; margin-top: 40px; padding-bottom: 20px; color: var(--text-muted); font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .footer-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
-.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); }
+.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 14px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; line-height: 1.6; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); }
 .footer-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
 .footer-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 /* ✔ НОВОЕ: кнопка GitHub в футере — это ссылка <a>, убираем подчёркивание */
