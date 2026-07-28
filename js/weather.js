@@ -20,7 +20,8 @@ const cities = [
   { id: 'clock-nhatrang', zone: 'Asia/Ho_Chi_Minh' }
 ];
 
-// Обновляет время в часах (вызывается каждую секунду)
+// Обновляет время в часах (раз в минуту, синхронно с началом минуты —
+// секунды на экране не показываются, а минуты переключаются ровно в :00)
 function updateClocks() {
   const now = new Date();
   cities.forEach(c => {
@@ -33,8 +34,19 @@ function updateClocks() {
     }).format(now);
   });
 }
+
+// ✔ НОВОЕ: показываем время сразу при загрузке страницы
 updateClocks();
-setInterval(updateClocks, 1000);
+
+// ✔ НОВОЕ: синхронизация часов с началом минуты.
+// Первый тик происходит ровно в :00 секунд ближайшей минуты, дальше — каждые 60 сек.
+// Без этого часы могли бы отставать до 59 секунд от реального времени.
+let clockInterval = null;
+const msToNextMinute = 60000 - (Date.now() % 60000); // миллисекунд до ближайшей минуты
+setTimeout(() => {
+  updateClocks();
+  clockInterval = setInterval(updateClocks, 60000);
+}, msToNextMinute);
 
 // ===== ПОГОДА =====
 // Города с координатами для API погоды
