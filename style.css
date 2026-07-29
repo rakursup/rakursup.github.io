@@ -303,6 +303,12 @@ body.eco-active *:active {
 
 /* ── ПЛАНШЕТЫ и небольшие ноутбуки: панель виджетов в 2 колонки ── */
 @media (max-width: 1024px) {
+    /* ✔ НОВОЕ: полностью отключаем backdrop-filter на планшетах и телефонах —
+       blur слишком тяжёл для мобильных GPU, без него скролл заметно плавнее.
+       Полупрозрачные фоны карточек остаются, читаемость не страдает.
+       !important перебивает точечные правила blur у карточек, панелей и фона */
+    *, *::before, *::after { backdrop-filter: none !important; }
+
     .info-panel { grid-template-columns: repeat(2, 1fr); }
     .weather-section, .notes-section { grid-column: span 2; }
     /* валюта+радио и календарь+помодоро встают парами */
