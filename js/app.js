@@ -7,7 +7,7 @@ const APP_VERSION = '1.0.0';
 const MAX_IMAGE_WIDTH = 1920;
 const IMAGE_QUALITY = 0.7;
 const MAX_BG_SIZE_BYTES = 2 * 1024 * 1024;
-// ✔ НОВОЕ: сила размытия, запекаемого в обои при добавлении (в пикселях картинки)
+// Сила размытия, запекаемого в обои при добавлении (в пикселях картинки)
 const BG_BLUR = 4;
 // ✔ ИСПРАВЛЕНО: «магическое число» вынесено в константу
 const MAX_LINKS_PER_CATEGORY = 7;
@@ -262,9 +262,9 @@ function compressImage(file, callback) {
             const scaleSize = MAX_IMAGE_WIDTH / img.width;
             canvas.width = (scaleSize < 1) ? MAX_IMAGE_WIDTH : img.width;
             canvas.height = (scaleSize < 1) ? img.height * scaleSize : img.height;
-            // ✔ НОВОЕ: запекаем размытие прямо в картинку. Рисуем с запасом
-            // BG_BLUR по краям, чтобы размытая «прозрачная» кайма ушла за холст
-            // (иначе по краям обоев была бы светлая рамка)
+            // Запекаем размытие прямо в картинку: рисуем с запасом BG_BLUR по
+            // краям, чтобы размытая «прозрачная» кайма ушла за холст (иначе по
+            // краям обоев была бы светлая рамка)
             ctx.filter = `blur(${BG_BLUR}px)`;
             ctx.drawImage(img, -BG_BLUR, -BG_BLUR, canvas.width + BG_BLUR * 2, canvas.height + BG_BLUR * 2);
             ctx.filter = 'none';
@@ -323,14 +323,12 @@ const searchEngines = {
 let currentSearchEngine = localStorage.getItem(ENGINE_KEY) || 'yandex';
 selectedSearchEngineText.textContent = searchEngines[currentSearchEngine].name;
 
+// ✔ ИЗМЕНЕНО: выбранный поисковик помечается классом active-engine (а не
+// inline-стилем) — акцентный цвет и галочку рисует CSS
 function updateActiveOption() {
     const options = customOptionsList.querySelectorAll('li');
     options.forEach(option => {
-        if (option.getAttribute('data-value') === currentSearchEngine) {
-            option.style.fontWeight = '600';
-        } else {
-            option.style.fontWeight = '400';
-        }
+        option.classList.toggle('active-engine', option.getAttribute('data-value') === currentSearchEngine);
     });
 }
 updateActiveOption();
