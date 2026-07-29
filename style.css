@@ -38,14 +38,16 @@
     }
 }
 
-/* Размытие обоев — через filter на самой картинке (#bg-layer), а не через
-   backdrop-filter на подложке. Filter кэшируется браузером (рисуется один раз)
-   и не грузит GPU при скролле. Обои размыты ВСЕГДА — и в эко-режиме, и на
-   мобильных: blur с них не снимается нигде. Слой увеличен на 120px, чтобы
-   размытые «прозрачные» края уходили за экран. GPU-фиксация (translateZ(0) +
-   will-change) сохранена — скролл фон не перерисовывает. */
-#bg-layer { position: fixed; top: -60px; left: -60px; width: calc(100% + 120px); height: calc(100% + 120px); background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; filter: blur(4px); transition: opacity 0.5s ease; transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
-#bg-blur { position: fixed; inset: 0; z-index: -1; background: var(--bg); opacity: 0.9; transition: background-color var(--transition); transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
+/* Размытие обоев запекается прямо в картинку при добавлении (canvas blur в
+   app.js, константа BG_BLUR) — поэтому здесь нет filter, а слой обычного
+   размера, без запаса по краям. Обои размыты ВСЕГДА: и в эко-режиме, и на
+   мобильных. GPU-фиксация (translateZ(0) + will-change) — скролл фон не
+   перерисовывает. */
+#bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; transition: opacity 0.5s ease; transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
+/* Тонирующий слой под тему: накладывает var(--bg) поверх обоев — в тёмной
+   теме они затемняются, в светлой выбеливаются (тот самый «светлый блюр»).
+   Opacity 0.5 — обои хорошо видны, но не пёстрые; подкрути под свой вкус */
+#bg-blur { position: fixed; inset: 0; z-index: -1; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
 
 .color-switcher { display: flex; gap: 8px; align-items: center; margin-left: 10px; padding: 0 5px; }
 .color-btn { width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
