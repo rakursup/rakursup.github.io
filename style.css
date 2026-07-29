@@ -9,7 +9,7 @@
 }
 
 [data-theme="dark"] {
-    --bg: #121212; --bg-secondary: #0a0a0a;
+    --bg: #121212; --bg-secondary: #242424;
     --card-bg: rgba(30, 30, 30, 0.75); --card-hover: rgba(37, 37, 37, 0.9);
     --text: #e0e0e0; --text-muted: #888;
     --border: rgba(255, 255, 255, 0.1); --shadow-color: rgba(0, 0, 0, 0.3);
@@ -38,11 +38,14 @@
     }
 }
 
-/* ✔ ИЗМЕНЕНО: слои фона принудительно вынесены на GPU (translateZ(0) + will-change).
-   Теперь скролл их вообще не перерисовывает — обои стоят как влитые,
-   без лагов, моргания и белых полос при быстрой прокрутке */
-#bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; transition: opacity 0.5s ease; transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
-#bg-blur { position: fixed; inset: 0; z-index: -1; backdrop-filter: blur(20px); background: var(--bg); opacity: 0.9; transition: background-color var(--transition); transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
+/* Размытие обоев — через filter на самой картинке (#bg-layer), а не через
+   backdrop-filter на подложке. Filter кэшируется браузером (рисуется один раз)
+   и не грузит GPU при скролле. Обои размыты ВСЕГДА — и в эко-режиме, и на
+   мобильных: blur с них не снимается нигде. Слой увеличен на 120px, чтобы
+   размытые «прозрачные» края уходили за экран. GPU-фиксация (translateZ(0) +
+   will-change) сохранена — скролл фон не перерисовывает. */
+#bg-layer { position: fixed; top: -60px; left: -60px; width: calc(100% + 120px); height: calc(100% + 120px); background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; filter: blur(4px); transition: opacity 0.5s ease; transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
+#bg-blur { position: fixed; inset: 0; z-index: -1; background: var(--bg); opacity: 0.9; transition: background-color var(--transition); transform: translateZ(0); will-change: transform; backface-visibility: hidden; }
 
 .color-switcher { display: flex; gap: 8px; align-items: center; margin-left: 10px; padding: 0 5px; }
 .color-btn { width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
@@ -63,6 +66,11 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Robo
 header { max-width: 1200px; margin: 0 auto 40px; padding-top: 10px; display: flex; align-items: center; gap: 15px; }
 h1 { font-size: 1.6rem; font-weight: 400; color: var(--text); white-space: nowrap; flex-shrink: 0; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
 
+/* ✔ ИЗМЕНЕНО: backdrop-filter убран со всех блоков и элементов управления —
+   на фоне размытых обоев «стекло» почти не видно, зато ощутимо грузит GPU.
+   Полупрозрачные фоны (var(--card-bg)) сохранены, в эко-режиме блоки
+   становятся полностью непрозрачными (см. правило ниже).
+   Backdrop-filter остался только у модального окна (открывается редко). */
 .search-box { display: flex; flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 50px; overflow: visible; box-shadow: var(--shadow-md); min-width: 0; position: relative; z-index: 100; }
 .custom-select-wrapper { position: relative; flex-shrink: 0; width: 140px; overflow: visible; z-index: 101; }
 .custom-select-trigger {
@@ -73,7 +81,7 @@ h1 { font-size: 1.6rem; font-weight: 400; color: var(--text); white-space: nowra
     outline: none; cursor: pointer;
     display: flex; align-items: center; justify-content: space-between;
     height: 100%; box-sizing: border-box;
-    transition: background-color 0.2s; backdrop-filter: blur(10px);
+    transition: background-color 0.2s;
 }
 .custom-select-trigger:hover { background: var(--card-hover); }
 .arrow-down { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--text); transition: border-top-color 0.2s; }
@@ -81,7 +89,7 @@ h1 { font-size: 1.6rem; font-weight: 400; color: var(--text); white-space: nowra
 .custom-options {
     position: absolute; top: calc(100% + 4px); left: 0; width: 100%;
     background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: var(--shadow-lg); backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-lg);
     list-style: none; padding: 6px 0; margin: 0; z-index: 9999;
     opacity: 0; visibility: hidden; transform: translateY(-10px);
     transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
@@ -96,14 +104,14 @@ h1 { font-size: 1.6rem; font-weight: 400; color: var(--text); white-space: nowra
 .search-box button:hover { background: var(--accent-hover); }
 
 .header-actions { display: flex; gap: 10px; flex-shrink: 0; align-items: center; }
-.icon-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); backdrop-filter: blur(10px); transition: transform 0.2s, background-color 0.2s; }
+.icon-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md); transition: transform 0.2s, background-color 0.2s; }
 .icon-btn:hover { transform: scale(1.08); }
 .icon-btn svg { width: 22px; height: 22px; fill: var(--accent); }
 .icon-btn.edit-active { border-color: var(--edit-mode-border); background: var(--edit-mode-border); }
 .icon-btn.edit-active svg { fill: #fff; }
 
 main { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; position: relative; backdrop-filter: blur(10px); box-shadow: var(--shadow-md); }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; position: relative; box-shadow: var(--shadow-md); }
 .card:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--card-hover); }
 body.editing .card { border-style: dashed; }
 body.editing .card:hover { border-color: var(--edit-mode-border); transform: none; }
@@ -124,7 +132,7 @@ body.editing .card a { padding-right: 30px; }
 .btn-delete-card:hover { background: rgba(211, 47, 47, 0.1); }
 .btn-add-link { color: var(--accent); width: 100%; text-align: left; padding: 6px 8px; margin-top: 4px; border: 1px dashed var(--border); }
 .btn-add-link:hover { background: rgba(32, 106, 155, 0.08); border-color: var(--accent); }
-.btn-add-card { background: var(--card-bg); border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; color: var(--text-muted); font-size: 1rem; transition: 0.2s; min-height: 150px; backdrop-filter: blur(10px); }
+.btn-add-card { background: var(--card-bg); border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; color: var(--text-muted); font-size: 1rem; transition: 0.2s; min-height: 150px; }
 body.editing .btn-add-card { display: flex; }
 .btn-add-card:hover { border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
 .card[draggable="true"] { cursor: grab; }
@@ -132,7 +140,7 @@ body.editing .card.dragging { opacity: 0.4; border-color: var(--accent); backgro
 body.editing .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); transform: scale(1.02); }
 
 .info-panel { max-width: 1200px; margin: 50px auto 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
-.panel-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-md); backdrop-filter: blur(10px); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+.panel-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-md); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
 .panel-block:hover { transform: translateY(-2px); border-color: var(--accent); }
 .panel-title { text-align: center; color: var(--text); font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 1.5px; text-transform: uppercase; width: 100%; flex-shrink: 0; }
 .weather-section > .panel-title, .currency-section > .panel-title, .radio-section > .panel-title, .pomodoro-section > .panel-title { border-bottom: 1px solid var(--border); padding-bottom: 10px; }
@@ -157,8 +165,7 @@ body.editing .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2p
 .currency-rate { font-family: 'Inter', 'SF Mono', 'Consolas', monospace; font-weight: 600; color: var(--text); }
 .currency-date { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
 
-/* ✔ ИЗМЕНЕНО: blur(10px) прописан явно — как у всех панелей */
-.radio-section { grid-column: span 1; min-width: auto; backdrop-filter: blur(10px); }
+.radio-section { grid-column: span 1; min-width: auto; }
 .radio-player { display: flex; flex-direction: column; align-items: center; gap: 12px; flex: 1; justify-content: center; }
 .radio-station-name { font-size: 0.95rem; font-weight: 600; color: var(--text); text-align: center; }
 .radio-controls { display: flex; align-items: center; gap: 12px; }
@@ -246,7 +253,7 @@ body.editing .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2p
 
 footer { text-align: center; margin-top: 40px; padding-bottom: 20px; color: var(--text-muted); font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .footer-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
-.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; line-height: 1.6; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); }
+.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; line-height: 1.6; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
 .footer-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
 .footer-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 /* ✔ НОВОЕ: кнопка GitHub в футере — это ссылка <a>, убираем подчёркивание */
@@ -286,11 +293,21 @@ body.theme-transitioning *::before, body.theme-transitioning *::after {
 .icon-btn.eco-active { border-color: #4caf50; background: #4caf50; }
 .icon-btn.eco-active svg { fill: #fff; }
 
-/* Отключаем плавные переходы, анимации и размытие фона для всех элементов */
+/* Отключаем плавные переходы, анимации и backdrop-filter (он остался только
+   у модального окна). Обоев (#bg-layer) это не касается — они размыты всегда */
 body.eco-active * {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     backdrop-filter: none !important;
+}
+
+/* ✔ НОВОЕ: в эко-режиме блоки становятся полностью непрозрачными —
+   размытые обои не просвечивают, блоки выглядят «резкими», а GPU не
+   тратит силы на смешивание полупрозрачных слоёв */
+body.eco-active .card,
+body.eco-active .panel-block,
+body.eco-active .btn-add-card {
+    background: var(--bg-secondary);
 }
 
 /* НО сохраняем ховер-эффекты для интерактивности */
@@ -306,10 +323,9 @@ body.eco-active *:active {
 
 /* ── ПЛАНШЕТЫ и небольшие ноутбуки: панель виджетов в 2 колонки ── */
 @media (max-width: 1024px) {
-    /* ✔ НОВОЕ: полностью отключаем backdrop-filter на планшетах и телефонах —
-       blur слишком тяжёл для мобильных GPU, без него скролл заметно плавнее.
-       Полупрозрачные фоны карточек остаются, читаемость не страдает.
-       !important перебивает точечные правила blur у карточек, панелей и фона */
+    /* Отключаем backdrop-filter (остался только у модалки) — на мобильных
+       GPU он тяжёл. Размытие обоев (#bg-layer) оставляем: обычный filter
+       кэшируется браузером и рисуется один раз */
     *, *::before, *::after { backdrop-filter: none !important; }
 
     .info-panel { grid-template-columns: repeat(2, 1fr); }
