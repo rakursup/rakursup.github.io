@@ -9,11 +9,10 @@ const IMAGE_QUALITY = 0.7;
 const MAX_BG_SIZE_BYTES = 2 * 1024 * 1024;
 // Сила размытия, запекаемого в обои при добавлении (в пикселях картинки)
 const BG_BLUR = 4;
-// ✔ ИСПРАВЛЕНО: «магическое число» вынесено в константу
+// Максимум ссылок в одной категории
 const MAX_LINKS_PER_CATEGORY = 7;
 
-// Стартовые закладки "из коробки" (показываются при первом запуске)
-// ✔ ИСПРАВЛЕНО: битые URL (пробелы в протоколе/домене) и лишние пробелы в названиях
+// Стартовые закладки «из коробки» (показываются при первом запуске)
 const DEFAULT_BOOKMARKS = [
     { title: '📧 Почта', links: [{ name: 'Яндекс Почта', url: 'https://mail.yandex.ru/' }, { name: 'Gmail', url: 'https://gmail.com/' }, { name: 'Mail.ru', url: 'https://e.mail.ru/' }, { name: 'Рамблер', url: 'https://mail.rambler.ru/' }] },
     { title: '💬 Соцсети & IT', links: [{ name: 'Habr', url: 'https://habr.ru/' }, { name: 'Вконтакте', url: 'https://vk.com/' }, { name: 'Twitter / X', url: 'https://twitter.com/' }, { name: 'LiveJournal', url: 'https://livejournal.com/' }] },
@@ -40,8 +39,7 @@ function loadBookmarks() {
         catch (e) { return JSON.parse(JSON.stringify(DEFAULT_BOOKMARKS)); }
     })() : JSON.parse(JSON.stringify(DEFAULT_BOOKMARKS));
 
-    // ✔ ИСПРАВЛЕНО: лёгкая чистка сохранённых данных —
-    // убираем случайные пробелы по краям названий и URL
+    // Лёгкая чистка сохранённых данных: убираем случайные пробелы по краям названий и URL
     bookmarks.forEach(cat => {
         if (typeof cat.title === 'string') cat.title = cat.title.trim();
         (cat.links || []).forEach(l => {
@@ -91,7 +89,7 @@ document.getElementById('bookmarks-grid').addEventListener('click', (e) => {
     }
     else if (action === 'add-link') {
         const ci = parseInt(btn.dataset.cat);
-        // ✔ ИСПРАВЛЕНО: лимит через константу, а не «магическое число»
+        // Лимит ссылок в категории (MAX_LINKS_PER_CATEGORY)
         if (bookmarks[ci].links.length >= MAX_LINKS_PER_CATEGORY) {
             alert('⚠️ В категории «' + bookmarks[ci].title + '» уже ' + MAX_LINKS_PER_CATEGORY + ' ссылок.\nУдалите одну, чтобы добавить новую.');
             return;
@@ -110,8 +108,7 @@ function setupDragEvents(c) {
     c.addEventListener('dragstart', function(e) { dragSrcIndex = +this.dataset.index; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
     c.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
     c.addEventListener('dragenter', function(e) { e.preventDefault(); const t = e.target.closest('.card'); if (t && +t.dataset.index !== dragSrcIndex) t.classList.add('drag-over'); });
-    // ✔ ИСПРАВЛЕНО: подсветка снимается только при выходе за пределы карточки
-    // (раньше «мигала» при переходе курсора на дочерние элементы)
+    // Подсветка снимается только при выходе за пределы карточки (не мигает на дочерних элементах)
     c.addEventListener('dragleave', function(e) { if (!this.contains(e.relatedTarget)) this.classList.remove('drag-over'); });
     c.addEventListener('drop', function(e) { e.preventDefault(); const t = e.target.closest('.card'); if (!t) return; const ti = +t.dataset.index; if (dragSrcIndex !== null && dragSrcIndex !== ti) { const [m] = bookmarks.splice(dragSrcIndex, 1); bookmarks.splice(ti, 0, m); saveBookmarks(); } });
     c.addEventListener('dragend', function() { this.classList.remove('dragging'); document.querySelectorAll('.card.drag-over').forEach(el => el.classList.remove('drag-over')); dragSrcIndex = null; });
@@ -219,8 +216,7 @@ function updateSelectArrowColor(colorHex) {
 function setAccent(color, save = true) {
     document.documentElement.style.setProperty('--accent', color);
     let hoverColor = color;
-    // ✔ ИСПРАВЛЕНО: hover для бирюзового не работал — сравнивалось с '#0ff0d9',
-    // а кнопка в HTML передаёт '#00D1BC'
+    // Hover-оттенок для каждого акцентного цвета
     if (color === '#f90') hoverColor = '#ffb347';
     else if (color === '#206a9b') hoverColor = '#2a85c2';
     else if (color === '#E72C98') hoverColor = '#ff66cc';
@@ -323,8 +319,7 @@ const searchEngines = {
 let currentSearchEngine = localStorage.getItem(ENGINE_KEY) || 'yandex';
 selectedSearchEngineText.textContent = searchEngines[currentSearchEngine].name;
 
-// ✔ ИЗМЕНЕНО: выбранный поисковик помечается классом active-engine (а не
-// inline-стилем) — акцентный цвет и галочку рисует CSS
+// Выбранный поисковик помечается классом active-engine — цвет и галочку рисует CSS
 function updateActiveOption() {
     const options = customOptionsList.querySelectorAll('li');
     options.forEach(option => {
@@ -333,8 +328,7 @@ function updateActiveOption() {
 }
 updateActiveOption();
 
-// ✔ ИСПРАВЛЕНО: единая функция открытия/закрытия селекта —
-// синхронизирует класс и aria-expanded (честное состояние для скринридеров)
+// Единая функция открытия/закрытия селекта: синхронизирует класс и aria-expanded (для скринридеров)
 function setSelectOpen(open) {
     customOptionsList.classList.toggle('active', open);
     customSelectTrigger.setAttribute('aria-expanded', String(open));
@@ -345,7 +339,7 @@ customSelectTrigger.addEventListener('click', (e) => {
     setSelectOpen(!customOptionsList.classList.contains('active'));
 });
 
-// ✔ ИСПРАВЛЕНО: управление селектом с клавиатуры (Enter/Space/Escape)
+// Управление селектом с клавиатуры (Enter/Space/Escape)
 customSelectTrigger.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -432,6 +426,16 @@ document.getElementById('import-file').addEventListener('change', function(e) {
         e.target.value = '';
     };
     reader.readAsText(file);
+});
+
+// ===== СБРОС К НАСТРОЙКАМ ПО УМОЛЧАНИЮ =====
+// Очищает localStorage и перезагружает страницу — сайт возвращается к состоянию
+// «из коробки» (стандартные закладки, тема, обои, поисковик и т.д.)
+document.getElementById('btn-reset').addEventListener('click', () => {
+    if (confirm('Сбросить дашборд к состоянию по умолчанию?\n\nБудут удалены: все измененные закладки и категории, будут стерты заметки, удалены обои. \n\nНе забудьте сохранить ваши закладки через Импорт и сохранить ваши быстрые заметки, если это необходимо!\n\nЭто действие необратимо.')) {
+        localStorage.clear();
+        location.reload();
+    }
 });
 
 // ===== ЗАПУСК ПРИЛОЖЕНИЯ =====
