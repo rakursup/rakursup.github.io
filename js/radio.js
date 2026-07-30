@@ -5,7 +5,7 @@
 // ⚠️ Relax FM и Jazz FM — потоки http://. Локально (file://) работают,
 // но при размещении страницы по HTTPS браузер заблокирует их (mixed content).
 const RADIO_STATIONS = [
-  { name: 'Relax FM', url: 'http://23.105.238.4/gpm-relaxfm495.aacp' },
+  { name: 'Relax FM', url: 'https://hls-01-gpm.hostingradio.ru/relaxfm495/playlist.m3u8' },
   { name: 'Record Chill', url: 'https://radiorecord.hostingradio.ru/chil96.aacp' },
   { name: 'Monte Carlo', url: 'https://montecarlo.hostingradio.ru/montecarlo128.mp3' },
   { name: 'Jazz FM', url: 'http://nashe1.hostingradio.ru/jazz-128.mp3' },
