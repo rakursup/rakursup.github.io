@@ -158,6 +158,36 @@ body.editing .btn-add-card { display: flex; }
 /* SortableJS: полупрозрачный «призрак» на том месте, куда встанет
    перетаскиваемая карточка (ghostClass в app.js) */
 .card-ghost { opacity: 0.4; border-style: dashed; border-color: var(--accent); }
+/* Ручка перетаскивания (опция handle в app.js) — плашка с грипом из точек
+   слева от заголовка карточки. Видна только в режиме редактирования;
+   тянуть карточку можно только за неё, поэтому ссылки остаются кликабельными */
+.card-drag-handle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 28px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    cursor: grab;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    transition: color 0.2s, border-color 0.2s;
+}
+body.editing .card-drag-handle { display: flex; }
+/* Грип — сетка точек 2×3 */
+.card-drag-handle::before {
+    content: '';
+    width: 10px;
+    height: 15px;
+    background-image: radial-gradient(circle, currentColor 1.2px, transparent 1.3px);
+    background-size: 5px 5px;
+}
+/* Наведение: точки и рамка плашки подсвечиваются акцентом */
+.card-drag-handle:hover { color: var(--accent); border-color: var(--accent); }
+.card-drag-handle:active { cursor: grabbing; }
 
 .info-panel { max-width: 1200px; margin: 50px auto 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
 .panel-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-md); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }

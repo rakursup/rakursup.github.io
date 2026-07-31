@@ -55,8 +55,9 @@ function saveBookmarks() {
     renderBookmarks();
 }
 
-// Отрисовывает все карточки закладок на странице
-// (перетаскиванием управляет SortableJS — навешивать draggable вручную не нужно)
+// Отрисовывает все карточки закладок на странице.
+// Перетаскиванием управляет SortableJS; плашка .card-drag-handle в шапке
+// карточки — единственная зона, за которую можно тянуть (опция handle)
 function renderBookmarks() {
     const grid = document.getElementById('bookmarks-grid'), addBtn = document.getElementById('add-card-btn');
     Array.from(grid.querySelectorAll('.card')).forEach(el => el.remove());
@@ -68,7 +69,7 @@ function renderBookmarks() {
         cat.links.forEach((l, li) => {
             lh += `<li><a href="${sanitizeUrl(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.name)}</a><button class="edit-controls btn-delete-link" data-action="delete-link" data-cat="${ci}" data-link="${li}">✕</button></li>`;
         });
-        card.innerHTML = `<div class="card-header"><h2>${escapeHtml(cat.title)}</h2><button class="edit-controls btn-delete-card" data-action="delete-card" data-index="${ci}">🗑️</button></div><ul>${lh}</ul><button class="edit-controls btn-add-link" data-action="add-link" data-cat="${ci}">+ Добавить ссылку</button>`;
+        card.innerHTML = `<div class="card-header"><span class="card-drag-handle" title="Перетащить блок"></span><h2>${escapeHtml(cat.title)}</h2><button class="edit-controls btn-delete-card" data-action="delete-card" data-index="${ci}">🗑️</button></div><ul>${lh}</ul><button class="edit-controls btn-add-link" data-action="add-link" data-cat="${ci}">+ Добавить ссылку</button>`;
         grid.insertBefore(card, addBtn);
     });
 }
@@ -114,6 +115,7 @@ function initSortable() {
     sortableInstance = Sortable.create(grid, {
         animation: 150,
         draggable: '.card',        // таскаем только карточки; кнопка «Добавить» остаётся на месте
+        handle: '.card-drag-handle', // тянем только за плашку-ручку — ссылки в карточке остаются кликабельными
         ghostClass: 'card-ghost',  // подсветка места, куда встанет карточка
         delay: 250,                // тач: drag стартует через 250 мс долгого нажатия
         delayOnTouchOnly: true,    // ...но только на тач-экранах, мышь таскает сразу
