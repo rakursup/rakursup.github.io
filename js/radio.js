@@ -2,8 +2,10 @@
 // ОНЛАЙН-РАДИО — аудиоплеер с 7 станциями
 // ============================================================
 // Список радиостанций
-// ⚠️ Relax FM и Jazz FM — потоки http://. Локально (file://) работают,
-// но при размещении страницы по HTTPS браузер заблокирует их (mixed content).
+// ⚠️ Jazz FM — поток http://: при размещении страницы по HTTPS браузер
+// заблокирует его (mixed content). Relax FM отдаёт HLS (.m3u8) по HTTPS —
+// нативный <audio> воспроизводит его только в Safari, в Chrome/Firefox
+// нужен hls.js (без него станция пропускается автопереключением).
 const RADIO_STATIONS = [
   { name: 'Relax FM', url: 'https://hls-01-gpm.hostingradio.ru/relaxfm495/playlist.m3u8' },
   { name: 'Record Chill', url: 'https://radiorecord.hostingradio.ru/chil96.aacp' },
@@ -15,7 +17,7 @@ const RADIO_STATIONS = [
 ];
 let currentStation = 0, isPlaying = false, errorRetryTimer = null, consecutiveErrors = 0;
 
-// ✔ ИСПРАВЛЕНО: переименована переменная, чтобы не конфликтовать с app.js
+// Переименована (isRadioEco), чтобы не конфликтовать с app.js:
 // в eco-режиме отключаем автопереключение станций при ошибках (экономим трафик)
 let isRadioEco = document.body.classList.contains('eco-active');
 
@@ -50,8 +52,9 @@ function loadRadioState() {
     const saved = JSON.parse(localStorage.getItem(RADIO_STORAGE_KEY));
     if (saved) {
       currentStation = Math.min(saved.station || 0, RADIO_STATIONS.length - 1);
-      volumeSlider.value = saved.volume ?? 50;
-      audioEl.volume = (saved.volume ?? 50) / 100;
+      // «??» не понимают старые браузеры (до Chrome 80) — равноценная проверка != null
+      volumeSlider.value = saved.volume != null ? saved.volume : 50;
+      audioEl.volume = (saved.volume != null ? saved.volume : 50) / 100;
     }
   } catch (e) {}
   stationName.textContent = RADIO_STATIONS[currentStation].name;
@@ -122,7 +125,7 @@ function handleStreamError() {
   if (!audioEl.getAttribute('src')) return;
   consecutiveErrors++;
 
-  // ✔ В eco-режиме не переключаем автоматически (экономим трафик)
+  // В eco-режиме не переключаем автоматически (экономим трафик)
   if (isRadioEco) {
     showError('Поток недоступен. Переключите станцию вручную.');
     stopRadio();
