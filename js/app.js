@@ -11,6 +11,10 @@ const MAX_BG_SIZE_BYTES = 2 * 1024 * 1024;
 const BG_BLUR = 4;
 // Максимум ссылок в одной категории
 const MAX_LINKS_PER_CATEGORY = 7;
+// Ограничение длины названий, чтобы не вылезали из карточек
+// (визуально длинные всё равно обрезаются многоточием — см. style.css)
+const MAX_TITLE_LENGTH = 30;       // название категории
+const MAX_LINK_NAME_LENGTH = 40;   // название ссылки
 
 // Стартовые закладки «из коробки» (показываются при первом запуске)
 const DEFAULT_BOOKMARKS = [
@@ -57,7 +61,8 @@ function saveBookmarks() {
 
 // Отрисовывает все карточки закладок на странице.
 // Перетаскивание блоков — SortableJS за плашку .card-drag-handle,
-// перетаскивание ссылок внутри блока — за грип .link-drag-handle
+// перетаскивание ссылок внутри блока — за грип .link-drag-handle.
+// Длинные названия обрезаются многоточием (CSS), title показывает их целиком
 function renderBookmarks() {
     const grid = document.getElementById('bookmarks-grid'), addBtn = document.getElementById('add-card-btn');
     Array.from(grid.querySelectorAll('.card')).forEach(el => el.remove());
@@ -67,9 +72,9 @@ function renderBookmarks() {
         card.dataset.index = ci;
         let lh = '';
         cat.links.forEach((l, li) => {
-            lh += `<li data-link="${li}"><span class="link-drag-handle edit-controls" title="Перетащить ссылку"></span><a href="${sanitizeUrl(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.name)}</a><button class="edit-controls btn-delete-link" data-action="delete-link" data-cat="${ci}" data-link="${li}">✕</button></li>`;
+            lh += `<li data-link="${li}"><span class="link-drag-handle edit-controls" title="Перетащить ссылку"></span><a href="${sanitizeUrl(l.url)}" target="_blank" rel="noopener" title="${escapeHtml(l.name)}">${escapeHtml(l.name)}</a><button class="edit-controls btn-delete-link" data-action="delete-link" data-cat="${ci}" data-link="${li}">✕</button></li>`;
         });
-        card.innerHTML = `<div class="card-header"><span class="card-drag-handle" title="Перетащить блок"></span><h2>${escapeHtml(cat.title)}</h2><button class="edit-controls btn-rename-card" data-action="rename-card" data-index="${ci}" title="Переименовать">✏️</button><button class="edit-controls btn-delete-card" data-action="delete-card" data-index="${ci}">🗑️</button></div><ul>${lh}</ul><button class="edit-controls btn-add-link" data-action="add-link" data-cat="${ci}">+ Добавить ссылку</button>`;
+        card.innerHTML = `<div class="card-header"><span class="card-drag-handle" title="Перетащить блок"></span><h2 title="${escapeHtml(cat.title)}">${escapeHtml(cat.title)}</h2><button class="edit-controls btn-rename-card" data-action="rename-card" data-index="${ci}" title="Переименовать">✏️</button><button class="edit-controls btn-delete-card" data-action="delete-card" data-index="${ci}">🗑️</button></div><ul>${lh}</ul><button class="edit-controls btn-add-link" data-action="add-link" data-cat="${ci}">+ Добавить ссылку</button>`;
         grid.insertBefore(card, addBtn);
     });
     // Пересоздаём Sortable-экземпляры списков (DOM пересобран)
@@ -176,13 +181,15 @@ const mo = document.getElementById('modal-overlay'), mt = document.getElementByI
 let mc = null;
 
 // Открывает модальное окно (добавление ссылок/категорий, переименование).
-// initialName — предзаполнить поле и выделить текст (режим переименования)
+// initialName — предзаполнить поле и выделить текст (режим переименования).
+// Лимит длины: для ссылки — MAX_LINK_NAME_LENGTH, для категории — MAX_TITLE_LENGTH
 function openModal(title, ln, showUrl, cb, initialName = '') {
     lastFocusedElement = document.activeElement;
     mt.textContent = title;
     mln.textContent = ln;
     mn.value = initialName;
     mu.value = '';
+    mn.maxLength = showUrl ? MAX_LINK_NAME_LENGTH : MAX_TITLE_LENGTH;
     mn.classList.remove('invalid');
     mu.classList.remove('invalid');
     muf.style.display = showUrl ? 'block' : 'none';
