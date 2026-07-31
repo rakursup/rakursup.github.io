@@ -43,14 +43,14 @@
    (inset: -100px) — страховка от «отставания» фиксированного фона при
    быстром скролле и оверскролле на телефонах. Обои размыты ВСЕГДА: и в
    эко-режиме, и на мобильных.
-   ВАЖНО: без transform/will-change — с ними слой на отдельном GPU-слое
-   игнорировал отрицательный z-index и перекрывал контент */
+   ВАЖНО: отрицательный z-index обязателен — без него слой рисуется поверх
+   статичного контента (виджетов и кнопок). Без transform/will-change —
+   с ними слой на отдельном GPU-слое мог игнорировать порядок отрисовки */
 #bg-layer { position: fixed; inset: -100px; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; transition: opacity 0.5s ease; }
 /* Тонирующий слой под тему: накладывает var(--bg) поверх обоев — в тёмной
    теме они затемняются, в светлой выбеливаются. Opacity 0.8 — обои едва
-   просвечивают, фон спокойный и читаемый. Тоже выпущен за края и без
-   GPU-ускорения (иначе перекрывал бы контент) */
-#bg-blur { position: fixed; inset: -100px; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); }
+   просвечивают, фон спокойный и читаемый */
+#bg-blur { position: fixed; inset: -100px; z-index: -1; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); }
 
 .color-switcher { display: flex; gap: 8px; align-items: center; margin-left: 10px; padding: 0 5px; }
 .color-btn { width: 24px; height: 24px; border-radius: 50%; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
