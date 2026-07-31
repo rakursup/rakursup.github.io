@@ -2,11 +2,10 @@
 // ОНЛАЙН-РАДИО — аудиоплеер с 7 станциями
 // ============================================================
 // Список радиостанций
-// ⚠️ Jazz FM — поток http:// (не https): на практике играет везде —
-// браузеры обычно пропускают mixed content аудио, но теоретически
-// строгие настройки могут его заблокировать. Relax FM — HLS (.m3u8):
-// играет в Safari и мобильных браузерах (через системный кодек),
-// в десктопных Chrome/Firefox/Opera без hls.js пропускается автопереключением.
+// ⚠️ Jazz FM — поток http://: при размещении страницы по HTTPS браузер
+// заблокирует его (mixed content). Relax FM отдаёт HLS (.m3u8) по HTTPS —
+// нативный <audio> воспроизводит его только в Safari, в Chrome/Firefox
+// нужен hls.js? (без него станция пропускается автопереключением).
 const RADIO_STATIONS = [
   { name: 'Relax FM', url: 'https://hls-01-gpm.hostingradio.ru/relaxfm495/playlist.m3u8' },
   { name: 'Record Chill', url: 'https://radiorecord.hostingradio.ru/chil96.aacp' },
