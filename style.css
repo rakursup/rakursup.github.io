@@ -135,7 +135,9 @@ main { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 
 body.editing .card { border-style: dashed; cursor: grab; }
 body.editing .card:hover { border-color: var(--edit-mode-border); transform: none; }
 .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-.card h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 10px; margin: 0; }
+/* flex: 1 — заголовок занимает свободное место, прижимая ✏️ и 🗑️ вправо;
+   min-width: 0 — длинные названия не ломают раскладку */
+.card h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 10px; margin: 0; flex: 1; min-width: 0; }
 .card ul { list-style: none; }
 .card li { margin-bottom: 8px; position: relative; }
 .card a { color: var(--text-muted); text-decoration: none; font-size: 0.95rem; display: block; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; }
@@ -143,12 +145,16 @@ body.editing .card:hover { border-color: var(--edit-mode-border); transform: non
 
 .edit-controls { display: none; }
 body.editing .edit-controls { display: flex; }
-body.editing .card a { padding-right: 30px; }
-.btn-delete-link, .btn-delete-card, .btn-add-link { background: none; border: none; cursor: pointer; font-size: 0.85rem; padding: 4px; border-radius: 4px; transition: 0.2s; }
+/* В режиме редактирования отступы под ручку ссылки (слева) и кнопку ✕ (справа) */
+body.editing .card a { padding-left: 20px; padding-right: 30px; }
+.btn-delete-link, .btn-delete-card, .btn-add-link, .btn-rename-card { background: none; border: none; cursor: pointer; font-size: 0.85rem; padding: 4px; border-radius: 4px; transition: 0.2s; }
 .btn-delete-link { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); color: var(--danger); opacity: 0.7; }
 .btn-delete-link:hover { opacity: 1; background: rgba(211, 47, 47, 0.1); }
 .btn-delete-card { color: var(--danger); font-size: 1rem; padding: 2px 6px; }
 .btn-delete-card:hover { background: rgba(211, 47, 47, 0.1); }
+/* Кнопка переименования категории (✏️ в шапке карточки) */
+.btn-rename-card { color: var(--text-muted); font-size: 1rem; padding: 2px 6px; }
+.btn-rename-card:hover { background: rgba(128, 128, 128, 0.15); }
 .btn-add-link { color: var(--accent); width: 100%; text-align: left; padding: 6px 8px; margin-top: 4px; border: 1px dashed var(--border); }
 .btn-add-link:hover { background: rgba(32, 106, 155, 0.08); border-color: var(--accent); }
 .btn-add-card { background: var(--card-bg); border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; display: none; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); font-size: 1rem; transition: 0.2s; min-height: 150px; }
@@ -158,9 +164,9 @@ body.editing .btn-add-card { display: flex; }
 /* SortableJS: полупрозрачный «призрак» на том месте, куда встанет
    перетаскиваемая карточка (ghostClass в app.js) */
 .card-ghost { opacity: 0.4; border-style: dashed; border-color: var(--accent); }
-/* Ручка перетаскивания (опция handle в app.js) — плашка с грипом из точек
-   слева от заголовка карточки. Видна только в режиме редактирования;
-   тянуть карточку можно только за неё, поэтому ссылки остаются кликабельными */
+/* Ручка перетаскивания блока (опция handle в app.js) — плашка с грипом из
+   точек слева от заголовка карточки. Видна только в режиме редактирования;
+   тянуть блок можно только за неё, поэтому ссылки остаются кликабельными */
 .card-drag-handle {
     display: none;
     align-items: center;
@@ -188,6 +194,27 @@ body.editing .card-drag-handle { display: flex; }
 /* Наведение: точки и рамка плашки подсвечиваются акцентом */
 .card-drag-handle:hover { color: var(--accent); border-color: var(--accent); }
 .card-drag-handle:active { cursor: grabbing; }
+/* Ручка перетаскивания ссылки — маленький грип слева от названия. Видна в
+   режиме редактирования (edit-controls); тянуть ссылку можно только за него,
+   клик по названию по-прежнему открывает сайт */
+.link-drag-handle {
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 12px;
+    cursor: grab;
+    color: var(--text-muted);
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1.1px);
+    background-size: 4px 4px;
+    opacity: 0.5;
+    transition: opacity 0.2s, color 0.2s;
+}
+.link-drag-handle:hover { opacity: 1; color: var(--accent); }
+.link-drag-handle:active { cursor: grabbing; }
+/* SortableJS: «призрак» на месте, куда встанет ссылка (ghostClass) */
+.link-ghost { opacity: 0.4; }
 
 .info-panel { max-width: 1200px; margin: 50px auto 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
 .panel-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-md); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }

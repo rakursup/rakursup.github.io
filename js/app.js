@@ -56,8 +56,8 @@ function saveBookmarks() {
 }
 
 // Отрисовывает все карточки закладок на странице.
-// Перетаскиванием управляет SortableJS; плашка .card-drag-handle в шапке
-// карточки — единственная зона, за которую можно тянуть (опция handle)
+// Перетаскивание блоков — SortableJS за плашку .card-drag-handle,
+// перетаскивание ссылок внутри блока — за грип .link-drag-handle
 function renderBookmarks() {
     const grid = document.getElementById('bookmarks-grid'), addBtn = document.getElementById('add-card-btn');
     Array.from(grid.querySelectorAll('.card')).forEach(el => el.remove());
@@ -67,14 +67,16 @@ function renderBookmarks() {
         card.dataset.index = ci;
         let lh = '';
         cat.links.forEach((l, li) => {
-            lh += `<li><a href="${sanitizeUrl(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.name)}</a><button class="edit-controls btn-delete-link" data-action="delete-link" data-cat="${ci}" data-link="${li}">✕</button></li>`;
+            lh += `<li data-link="${li}"><span class="link-drag-handle edit-controls" title="Перетащить ссылку"></span><a href="${sanitizeUrl(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.name)}</a><button class="edit-controls btn-delete-link" data-action="delete-link" data-cat="${ci}" data-link="${li}">✕</button></li>`;
         });
-        card.innerHTML = `<div class="card-header"><span class="card-drag-handle" title="Перетащить блок"></span><h2>${escapeHtml(cat.title)}</h2><button class="edit-controls btn-delete-card" data-action="delete-card" data-index="${ci}">🗑️</button></div><ul>${lh}</ul><button class="edit-controls btn-add-link" data-action="add-link" data-cat="${ci}">+ Добавить ссылку</button>`;
+        card.innerHTML = `<div class="card-header"><span class="card-drag-handle" title="Перетащить блок"></span><h2>${escapeHtml(cat.title)}</h2><button class="edit-controls btn-rename-card" data-action="rename-card" data-index="${ci}" title="Переименовать">✏️</button><button class="edit-controls btn-delete-card" data-action="delete-card" data-index="${ci}">🗑️</button></div><ul>${lh}</ul><button class="edit-controls btn-add-link" data-action="add-link" data-cat="${ci}">+ Добавить ссылку</button>`;
         grid.insertBefore(card, addBtn);
     });
+    // Пересоздаём Sortable-экземпляры списков (DOM пересобран)
+    initLinkSortables();
 }
 
-// Обработчик кликов по кнопкам удаления/добавления ссылок
+// Обработчик кликов по кнопкам удаления/добавления/переименования
 document.getElementById('bookmarks-grid').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
@@ -82,6 +84,14 @@ document.getElementById('bookmarks-grid').addEventListener('click', (e) => {
     if (action === 'delete-card') {
         const i = parseInt(btn.dataset.index);
         if (confirm(`Удалить «${bookmarks[i].title}»?`)) { bookmarks.splice(i, 1); saveBookmarks(); }
+    }
+    else if (action === 'rename-card') {
+        const i = parseInt(btn.dataset.index);
+        // Модалка с предзаполненным (и выделенным) текущим названием
+        openModal('Переименовать категорию', 'Название', false, (n) => {
+            bookmarks[i].title = n;
+            saveBookmarks();
+        }, bookmarks[i].title);
     }
     else if (action === 'delete-link') {
         const c = parseInt(btn.dataset.cat), l = parseInt(btn.dataset.link);
@@ -131,23 +141,54 @@ function initSortable() {
     });
 }
 
+// ===== ПЕРЕТАСКИВАНИЕ ССЫЛОК ВНУТРИ КАРТОЧКИ =====
+// Отдельный Sortable на каждый <ul>. Экземпляры пересоздаются после каждого
+// renderBookmarks (списки перестраиваются), поэтому храним их в массиве
+let linkSortables = [];
+
+function initLinkSortables() {
+    linkSortables.forEach(s => s.destroy());
+    linkSortables = [];
+    if (!isEditing || typeof Sortable === 'undefined') return;
+    document.querySelectorAll('#bookmarks-grid .card').forEach(card => {
+        const ul = card.querySelector('ul');
+        const catIndex = parseInt(card.dataset.index, 10);
+        linkSortables.push(Sortable.create(ul, {
+            animation: 150,
+            draggable: 'li',
+            handle: '.link-drag-handle',   // тянем только за грип слева от ссылки
+            ghostClass: 'link-ghost',
+            delay: 250,                    // тач: долгое нажатие, свайп — прокрутка
+            delayOnTouchOnly: true,
+            touchStartThreshold: 10,
+            onEnd: function() {
+                const newOrder = Array.from(ul.querySelectorAll('li')).map(li => parseInt(li.dataset.link, 10));
+                if (newOrder.every((idx, pos) => idx === pos)) return;
+                bookmarks[catIndex].links = newOrder.map(i => bookmarks[catIndex].links[i]);
+                saveBookmarks();
+            }
+        }));
+    });
+}
+
 // ===== МОДАЛЬНОЕ ОКНО =====
 const mo = document.getElementById('modal-overlay'), mt = document.getElementById('modal-title'), mln = document.getElementById('modal-label-name'), mn = document.getElementById('modal-input-name'), mu = document.getElementById('modal-input-url'), muf = document.getElementById('modal-url-field');
 let mc = null;
 
-// Открывает модальное окно (для добавления ссылок и категорий)
-function openModal(title, ln, showUrl, cb) {
+// Открывает модальное окно (добавление ссылок/категорий, переименование).
+// initialName — предзаполнить поле и выделить текст (режим переименования)
+function openModal(title, ln, showUrl, cb, initialName = '') {
     lastFocusedElement = document.activeElement;
     mt.textContent = title;
     mln.textContent = ln;
-    mn.value = '';
+    mn.value = initialName;
     mu.value = '';
     mn.classList.remove('invalid');
     mu.classList.remove('invalid');
     muf.style.display = showUrl ? 'block' : 'none';
     mc = cb;
     mo.classList.add('active');
-    requestAnimationFrame(() => mn.focus());
+    requestAnimationFrame(() => { mn.focus(); if (initialName) mn.select(); });
 }
 
 function closeModal() {
@@ -218,8 +259,9 @@ et.addEventListener('click', () => {
     isEditing = !isEditing;
     document.body.classList.toggle('editing', isEditing);
     et.classList.toggle('edit-active', isEditing);
-    // Включаем/выключаем перетаскивание вместе с режимом редактирования
+    // Включаем/выключаем перетаскивание блоков вместе с режимом редактирования
     if (sortableInstance) sortableInstance.option('disabled', !isEditing);
+    // Перерисовка сама пересоздаст Sortable-экземпляры списков (initLinkSortables)
     renderBookmarks();
 });
 
