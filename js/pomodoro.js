@@ -39,9 +39,11 @@ function loadPomoState() {
     const saved = JSON.parse(localStorage.getItem(POMO_KEY));
     if (saved) {
       pomoState.mode = saved.mode || 'work';
-      pomoState.timeLeft = saved.timeLeft ?? POMO_WORK_MIN * 60;
-      pomoState.totalTime = saved.totalTime ?? POMO_WORK_MIN * 60;
-      pomoState.completedSessions = saved.completedSessions ?? 0;
+      // «??» не понимают старые браузеры (до Chrome 80) — это синтаксическая
+      // ошибка, роняющая весь скрипт. Проверка != null полностью равноценна
+      pomoState.timeLeft = saved.timeLeft != null ? saved.timeLeft : POMO_WORK_MIN * 60;
+      pomoState.totalTime = saved.totalTime != null ? saved.totalTime : POMO_WORK_MIN * 60;
+      pomoState.completedSessions = saved.completedSessions != null ? saved.completedSessions : 0;
       pomoState.running = false;
     }
   } catch (e) {}
@@ -60,11 +62,11 @@ function savePomoState(force = false) {
   }));
 }
 
-// Форматирует секунды в вид "MM:SS"
+// Форматирует секунды в вид "MM:SS" (без padStart — его нет в Chrome < 57)
 function formatPomoTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 }
 
 // Обновляет все элементы таймера на экране

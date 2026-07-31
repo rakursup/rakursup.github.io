@@ -372,7 +372,7 @@ body.eco-active *:active {
 }
 
 /* ── ПЛАНШЕТЫ (портрет): перестраиваем шапку, чтобы ничего не наезжало ── */
-@media (max-width: 850px) {
+@media (max-width: 990px) {
     header { flex-wrap: wrap; justify-content: center; }
     h1 { width: 100%; text-align: center; }
     .search-box { flex: 1 1 100%; }
