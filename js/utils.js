@@ -59,7 +59,7 @@ function debounce(func, wait) {
     };
 }
 
-// Защита от XSS-атак: превращает опасные символы < > " ' в безопасные
+// Защита от XSS-атак: экранирует опасные символы (& < > " ') в безопасные HTML-сущности
 function escapeHtml(text) {
     if (!text) return '';
     const d = document.createElement('div');
@@ -67,8 +67,8 @@ function escapeHtml(text) {
     return d.innerHTML;
 }
 
-// Проверяет, что URL безопасный (только http, https, mailto)
-// Блокирует опасные ссылки типа javascript:alert(1)
+// Проверяет, что URL безопасный (разрешены только http, https, mailto)
+// Блокирует опасные схемы javascript: и data: (например, javascript:alert(1))
 function sanitizeUrl(url) {
     if (!url) return '#';
     const trimmed = url.trim();
