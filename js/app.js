@@ -15,6 +15,9 @@ const MAX_LINKS_PER_CATEGORY = 7;
 // (визуально длинные всё равно обрезаются многоточием — см. style.css)
 const MAX_TITLE_LENGTH = 30;       // название категории
 const MAX_LINK_NAME_LENGTH = 40;   // название ссылки
+// Максимальная длина URL: в отличие от названий, длинная ссылка не режется
+// молча (обрезанная была бы битой), а отклоняется валидацией в модальном окне
+const MAX_URL_LENGTH = 300;        // сама ссылка (URL)
 
 // Стартовые закладки «из коробки» (показываются при первом запуске)
 const DEFAULT_BOOKMARKS = [
@@ -182,7 +185,9 @@ let mc = null;
 
 // Открывает модальное окно (добавление ссылок/категорий, переименование).
 // initialName — предзаполнить поле и выделить текст (режим переименования).
-// Лимит длины: для ссылки — MAX_LINK_NAME_LENGTH, для категории — MAX_TITLE_LENGTH
+// Лимит длины названия: для ссылки — MAX_LINK_NAME_LENGTH, для категории —
+// MAX_TITLE_LENGTH. Длина URL здесь не ограничивается — её проверяет
+// валидация при сохранении (MAX_URL_LENGTH), чтобы не резать ссылку молча
 function openModal(title, ln, showUrl, cb, initialName = '') {
     lastFocusedElement = document.activeElement;
     mt.textContent = title;
@@ -226,6 +231,8 @@ document.getElementById('modal-save').addEventListener('click', () => {
     mu.classList.remove('invalid');
     if (!n) { mn.classList.add('invalid'); mn.focus(); v = false; }
     if (v && muf.style.display !== 'none' && !u) { mu.classList.add('invalid'); mu.focus(); v = false; }
+    // URL длиннее MAX_URL_LENGTH — отклоняем: молча обрезанная ссылка была бы битой
+    if (v && muf.style.display !== 'none' && u.length > MAX_URL_LENGTH) { mu.classList.add('invalid'); mu.focus(); v = false; }
     if (v && muf.style.display !== 'none' && sanitizeUrl(u) === '#') { mu.classList.add('invalid'); mu.focus(); v = false; }
     if (!v) return;
     if (mc) mc(n, u);
