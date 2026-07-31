@@ -2,15 +2,15 @@
 // ОНЛАЙН-РАДИО — аудиоплеер с 7 станциями
 // ============================================================
 // Список радиостанций
-// ⚠️ Jazz FM — поток http://: при размещении страницы по HTTPS браузер
-// заблокирует его (mixed content). Relax FM отдаёт HLS (.m3u8) по HTTPS —
-// нативный <audio> воспроизводит его только в Safari, в Chrome/Firefox
-// нужен hls.js? (без него станция пропускается автопереключением).
+// ⚠️ Relax FM — HLS (.m3u8): играет в Safari и мобильных браузерах (через
+// системный кодек), в десктопных Chrome/Firefox/Opera без hls.js пропускается
+// автопереключением. Остальные станции (включая Jazz FM) — прямые потоки
+// mp3/aac по HTTPS, играют в любом браузере без mixed content.
 const RADIO_STATIONS = [
   { name: 'Relax FM', url: 'https://hls-01-gpm.hostingradio.ru/relaxfm495/playlist.m3u8' },
   { name: 'Record Chill', url: 'https://radiorecord.hostingradio.ru/chil96.aacp' },
   { name: 'Monte Carlo', url: 'https://montecarlo.hostingradio.ru/montecarlo128.mp3' },
-  { name: 'Jazz FM', url: 'http://nashe1.hostingradio.ru/jazz-128.mp3' },
+  { name: 'Jazz FM', url: 'https://nashe1.hostingradio.ru/jazz-128.mp3' },
   { name: 'SomaFM Groove Salad', url: 'https://ice1.somafm.com/groovesalad-128-mp3' },
   { name: 'SomaFM Drone Zone', url: 'https://ice1.somafm.com/dronezone-128-mp3' },
   { name: 'SomaFM Secret Agent', url: 'https://ice1.somafm.com/secretagent-128-mp3' }
