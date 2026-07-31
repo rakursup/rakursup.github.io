@@ -56,6 +56,7 @@ function saveBookmarks() {
 }
 
 // Отрисовывает все карточки закладок на странице
+// (перетаскиванием управляет SortableJS — навешивать draggable вручную не нужно)
 function renderBookmarks() {
     const grid = document.getElementById('bookmarks-grid'), addBtn = document.getElementById('add-card-btn');
     Array.from(grid.querySelectorAll('.card')).forEach(el => el.remove());
@@ -63,7 +64,6 @@ function renderBookmarks() {
         const card = document.createElement('section');
         card.className = 'card';
         card.dataset.index = ci;
-        if (isEditing) { card.draggable = true; setupDragEvents(card); }
         let lh = '';
         cat.links.forEach((l, li) => {
             lh += `<li><a href="${sanitizeUrl(l.url)}" target="_blank" rel="noopener">${escapeHtml(l.name)}</a><button class="edit-controls btn-delete-link" data-action="delete-link" data-cat="${ci}" data-link="${li}">✕</button></li>`;
@@ -101,17 +101,32 @@ document.getElementById('bookmarks-grid').addEventListener('click', (e) => {
     }
 });
 
-// ===== ПЕРЕТАСКИВАНИЕ КАРТОЧЕК (Drag & Drop) =====
-let dragSrcIndex = null;
+// ===== ПЕРЕТАСКИВАНИЕ КАРТОЧЕК (SortableJS) =====
+// Нативный HTML5 Drag & Drop не работает на тач-экранах, поэтому используем
+// SortableJS — он умеет и мышь, и тач. На планшете/телефоне перетаскивание
+// стартует долгим нажатием (delay), чтобы обычный свайп прокручивал страницу.
+let sortableInstance = null;
 
-function setupDragEvents(c) {
-    c.addEventListener('dragstart', function(e) { dragSrcIndex = +this.dataset.index; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
-    c.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-    c.addEventListener('dragenter', function(e) { e.preventDefault(); const t = e.target.closest('.card'); if (t && +t.dataset.index !== dragSrcIndex) t.classList.add('drag-over'); });
-    // Подсветка снимается только при выходе за пределы карточки (не мигает на дочерних элементах)
-    c.addEventListener('dragleave', function(e) { if (!this.contains(e.relatedTarget)) this.classList.remove('drag-over'); });
-    c.addEventListener('drop', function(e) { e.preventDefault(); const t = e.target.closest('.card'); if (!t) return; const ti = +t.dataset.index; if (dragSrcIndex !== null && dragSrcIndex !== ti) { const [m] = bookmarks.splice(dragSrcIndex, 1); bookmarks.splice(ti, 0, m); saveBookmarks(); } });
-    c.addEventListener('dragend', function() { this.classList.remove('dragging'); document.querySelectorAll('.card.drag-over').forEach(el => el.classList.remove('drag-over')); dragSrcIndex = null; });
+function initSortable() {
+    // Библиотека не загрузилась — работаем без перетаскивания, остальное не страдает
+    if (typeof Sortable === 'undefined') return;
+    const grid = document.getElementById('bookmarks-grid');
+    sortableInstance = Sortable.create(grid, {
+        animation: 150,
+        draggable: '.card',        // таскаем только карточки; кнопка «Добавить» остаётся на месте
+        ghostClass: 'card-ghost',  // подсветка места, куда встанет карточка
+        delay: 250,                // тач: drag стартует через 250 мс долгого нажатия
+        delayOnTouchOnly: true,    // ...но только на тач-экранах, мышь таскает сразу
+        touchStartThreshold: 10,   // сдвинулись > 10px за время delay — это свайп, не drag
+        disabled: !isEditing,      // вне режима редактирования перетаскивание выключено
+        onEnd: function() {
+            // Новый порядок читаем из DOM: data-index помнит исходную позицию карточки
+            const newOrder = Array.from(grid.querySelectorAll('.card')).map(el => parseInt(el.dataset.index, 10));
+            if (newOrder.every((idx, pos) => idx === pos)) return; // порядок не изменился
+            bookmarks = newOrder.map(i => bookmarks[i]);
+            saveBookmarks();
+        }
+    });
 }
 
 // ===== МОДАЛЬНОЕ ОКНО =====
@@ -201,6 +216,8 @@ et.addEventListener('click', () => {
     isEditing = !isEditing;
     document.body.classList.toggle('editing', isEditing);
     et.classList.toggle('edit-active', isEditing);
+    // Включаем/выключаем перетаскивание вместе с режимом редактирования
+    if (sortableInstance) sortableInstance.option('disabled', !isEditing);
     renderBookmarks();
 });
 
@@ -440,6 +457,7 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 });
 
 // ===== ЗАПУСК ПРИЛОЖЕНИЯ =====
-// Загружаем закладки и рисуем их на экране
+// Загружаем закладки, рисуем их и включаем перетаскивание (SortableJS)
 loadBookmarks();
 renderBookmarks();
+initSortable();

@@ -130,7 +130,9 @@ h1 { font-size: 1.6rem; font-weight: 400; color: var(--text); white-space: nowra
 main { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
 .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; position: relative; box-shadow: var(--shadow-md); }
 .card:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--card-hover); }
-body.editing .card { border-style: dashed; }
+/* Режим редактирования: пунктирная рамка и курсор «рука» — карточки
+   перетаскиваются через SortableJS (мышь и тач) */
+body.editing .card { border-style: dashed; cursor: grab; }
 body.editing .card:hover { border-color: var(--edit-mode-border); transform: none; }
 .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 .card h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 10px; margin: 0; }
@@ -153,9 +155,9 @@ body.editing .card a { padding-right: 30px; }
 .btn-add-card > * + * { margin-top: 10px; }
 body.editing .btn-add-card { display: flex; }
 .btn-add-card:hover { border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
-.card[draggable="true"] { cursor: grab; }
-body.editing .card.dragging { opacity: 0.4; border-color: var(--accent); background: var(--bg-secondary); }
-body.editing .card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); transform: scale(1.02); }
+/* SortableJS: полупрозрачный «призрак» на том месте, куда встанет
+   перетаскиваемая карточка (ghostClass в app.js) */
+.card-ghost { opacity: 0.4; border-style: dashed; border-color: var(--accent); }
 
 .info-panel { max-width: 1200px; margin: 50px auto 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
 .panel-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-md); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
