@@ -2,7 +2,7 @@
 // КУРСЫ ВАЛЮТ — показывает курсы THB, CNY, USD, EUR к RUB
 // ============================================================
 
-// ✔ ИЗМЕНЕНО: два интервала обновления — обычный и экономичный
+// Два интервала обновления — обычный и экономичный
 const CURRENCY_UPDATE_NORMAL = 60 * 60 * 1000;   // 1 час
 const CURRENCY_UPDATE_ECO = 6 * 60 * 60 * 1000;  // 6 часов
 
@@ -56,17 +56,17 @@ async function fetchCurrencies() {
   }
 }
 
-// ✔ ДОБАВЛЕНО: выбирает интервал в зависимости от экономичного режима
+// Выбирает интервал в зависимости от экономичного режима
 function getCurrencyInterval() {
     return document.body.classList.contains('eco-active')
         ? CURRENCY_UPDATE_ECO
         : CURRENCY_UPDATE_NORMAL;
 }
 
-// ✔ ИЗМЕНЕНО: запускаем таймер с актуальным интервалом
+// Запускаем таймер с актуальным интервалом
 let currencyInterval = setInterval(fetchCurrencies, getCurrencyInterval());
 
-// ✔ ДОБАВЛЕНО: слушаем переключение экономичного режима из app.js
+// Слушаем переключение экономичного режима из app.js
 // и пересоздаём таймер с новым интервалом
 window.addEventListener('ecomode-changed', () => {
     clearInterval(currencyInterval);

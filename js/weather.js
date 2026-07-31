@@ -2,14 +2,14 @@
 // ПОГОДА И ЧАСЫ — показывает время и погоду в 3 городах
 // ============================================================
 
-// ✔ ДОБАВЛЕНО: два интервала обновления — обычный и экономичный
+// Два интервала обновления — обычный и экономичный
 const WEATHER_UPDATE_NORMAL = 30 * 60 * 1000;   // 30 минут
 const WEATHER_UPDATE_ECO = 4 * 60 * 60 * 1000;  // 4 часа
 
 // Таймаут запроса: если API не ответил за 10 секунд — прерываем
 const WEATHER_FETCH_TIMEOUT = 10000;
 
-// ✔ ДОБАВЛЕНО: ключи для сохранения кэша погоды в localStorage
+// Ключи для сохранения кэша погоды в localStorage
 const WEATHER_CACHE_KEY = 'weather_cache';
 const WEATHER_CACHE_TIME_KEY = 'weather_cache_time';
 
@@ -35,10 +35,10 @@ function updateClocks() {
   });
 }
 
-// ✔ НОВОЕ: показываем время сразу при загрузке страницы
+// Показываем время сразу при загрузке страницы
 updateClocks();
 
-// ✔ НОВОЕ: синхронизация часов с началом минуты.
+// Синхронизация часов с началом минуты.
 // Первый тик происходит ровно в :00 секунд ближайшей минуты, дальше — каждые 60 сек.
 // Без этого часы могли бы отставать до 59 секунд от реального времени.
 let clockInterval = null;
@@ -69,7 +69,7 @@ const wCodes = {
   96: { i: '⛈️', d: 'Гроза с градом' }, 99: { i: '⛈️', d: 'Сильная гроза с градом' }
 };
 
-// ✔ ДОБАВЛЕНО: единая функция отрисовки погоды на странице
+// Единая функция отрисовки погоды на странице
 // (используется и при загрузке кэша, и при получении свежих данных)
 function displayWeather(cityId, data) {
     const t = Math.round(data.temperature_2m);
@@ -82,7 +82,7 @@ function displayWeather(cityId, data) {
         `<div class="weather-details"><span>💨 ${w}</span><span>💧 ${h}%</span></div>`;
 }
 
-// ✔ ДОБАВЛЕНО: мгновенно показывает сохранённую погоду из localStorage
+// Мгновенно показывает сохранённую погоду из localStorage
 function loadWeatherCache() {
     try {
         const cached = localStorage.getItem(WEATHER_CACHE_KEY);
@@ -95,7 +95,7 @@ function loadWeatherCache() {
     } catch (e) {}
 }
 
-// ✔ ДОБАВЛЕНО: сохраняет полученные данные в кэш
+// Сохраняет полученные данные в кэш
 function saveWeatherCache(data) {
     try {
         safeSetItem(WEATHER_CACHE_KEY, JSON.stringify(data));
@@ -110,7 +110,7 @@ async function fetchWeather(c) {
   try {
     const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto`, { signal: controller.signal });
     const d = await r.json();
-    // ✔ ИЗМЕНЕНО: используем единую функцию отрисовки
+    // Используем единую функцию отрисовки
     displayWeather(c.id, d.current);
     // Возвращаем данные для сохранения в кэш
     return { id: c.id, data: d.current };
@@ -126,7 +126,7 @@ async function fetchWeather(c) {
   }
 }
 
-// ✔ ДОБАВЛЕНО: загружает погоду для всех городов и сохраняет в кэш
+// Загружает погоду для всех городов и сохраняет в кэш
 async function fetchAllWeather() {
     const allData = {};
     for (const c of wCities) {
@@ -138,23 +138,23 @@ async function fetchAllWeather() {
     }
 }
 
-// ✔ ДОБАВЛЕНО: выбирает интервал в зависимости от экономичного режима
+// Выбирает интервал в зависимости от экономичного режима
 function getUpdateInterval() {
     return document.body.classList.contains('eco-active')
         ? WEATHER_UPDATE_ECO
         : WEATHER_UPDATE_NORMAL;
 }
 
-// ✔ ДОБАВЛЕНО: запускаем таймер с актуальным интервалом
+// Запускаем таймер с актуальным интервалом
 let weatherInterval = setInterval(fetchAllWeather, getUpdateInterval());
 
-// ✔ ДОБАВЛЕНО: слушаем переключение экономичного режима из app.js
+// Слушаем переключение экономичного режима из app.js
 // и пересоздаём таймер с новым интервалом
 window.addEventListener('ecomode-changed', () => {
     clearInterval(weatherInterval);
     weatherInterval = setInterval(fetchAllWeather, getUpdateInterval());
 });
 
-// ✔ ИЗМЕНЕНО: сначала мгновенно показываем кэш, потом тянем актуальные данные
+// Сначала мгновенно показываем кэш, потом тянем актуальные данные
 loadWeatherCache();
 fetchAllWeather();
