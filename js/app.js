@@ -394,16 +394,17 @@ function validateBookmarks(data) {
     return null;
 }
 
-// Скачивает все закладки в JSON-файл
+// Скачивает все закладки в JSON-файл.
+// Через data-URI вместо Blob + URL.createObjectURL — так скачивание работает
+// и в старых браузерах (на планшете Blob-вариант не срабатывал)
 document.getElementById('btn-export').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(bookmarks, null, 2)], { type: 'application/json' });
+    const json = JSON.stringify(bookmarks, null, 2);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
     a.download = `dashboard-backup-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
 });
 
 // Загружает закладки из JSON-файла
@@ -432,7 +433,7 @@ document.getElementById('import-file').addEventListener('change', function(e) {
 // Очищает localStorage и перезагружает страницу — сайт возвращается к состоянию
 // «из коробки» (стандартные закладки, тема, обои, поисковик и т.д.)
 document.getElementById('btn-reset').addEventListener('click', () => {
-    if (confirm('Сбросить дашборд к состоянию по умолчанию?\n\nБудут удалены: все измененные закладки и категории, будут стерты заметки, удалены обои. \n\nНе забудьте сохранить ваши закладки через Импорт и сохранить ваши быстрые заметки, если это необходимо!\n\nЭто действие необратимо.')) {
+    if (confirm('Сбросить дашборд к состоянию по умолчанию?\n\nБудут удалены: все измененные закладки и категории, будут стерты заметки, удалены обои. \n\nНе забудьте сохранить ваши закладки через Экспорт и сохранить ваши быстрые заметки, если это необходимо!\n\nЭто действие необратимо.')) {
         localStorage.clear();
         location.reload();
     }

@@ -40,17 +40,18 @@
 
 /* Размытие обоев запекается прямо в картинку при добавлении (canvas blur в
    app.js, константа BG_BLUR). Слой выпущен на 100px за края экрана
-   (inset: -100px) — страховка от «отставания» фиксированного фона при
-   быстром скролле и оверскролле на телефонах. Обои размыты ВСЕГДА: и в
-   эко-режиме, и на мобильных.
+   (явные top/left/right/bottom: -100px вместо shorthand inset — его не
+   понимают браузеры до Chrome 87) — страховка от «отставания» фиксированного
+   фона при быстром скролле и оверскролле на телефонах. Обои размыты ВСЕГДА:
+   и в эко-режиме, и на мобильных.
    ВАЖНО: отрицательный z-index обязателен — без него слой рисуется поверх
    статичного контента (виджетов и кнопок). Без transform/will-change —
    с ними слой на отдельном GPU-слое мог игнорировать порядок отрисовки */
-#bg-layer { position: fixed; inset: -100px; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; transition: opacity 0.5s ease; }
+#bg-layer { position: fixed; top: -100px; left: -100px; right: -100px; bottom: -100px; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; transition: opacity 0.5s ease; }
 /* Тонирующий слой под тему: накладывает var(--bg) поверх обоев — в тёмной
    теме они затемняются, в светлой выбеливаются. Opacity 0.8 — обои едва
    просвечивают, фон спокойный и читаемый */
-#bg-blur { position: fixed; inset: -100px; z-index: -1; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); }
+#bg-blur { position: fixed; top: -100px; left: -100px; right: -100px; bottom: -100px; z-index: -1; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); }
 
 .color-switcher { display: flex; align-items: center; margin-left: 10px; padding: 0 5px; }
 /* Отступы через margin вместо flex gap — работает даже на старых движках
@@ -297,7 +298,10 @@ a.footer-btn { text-decoration: none; }
 .footer-btn-github svg { fill: currentColor; stroke: none; }
 #import-file, #bg-file { display: none; }
 
-.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+/* Модальное окно: position: fixed с явными top/left/right/bottom (не inset —
+   его не понимают браузеры до Chrome 87, из-за чего модалка уезжала за экран
+   и добавление ссылок/категорий на планшете не работало) */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
 .modal-overlay.active { display: flex; }
 .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px; box-shadow: var(--shadow-lg); backdrop-filter: blur(20px); }
 .modal h3 { margin-bottom: 16px; font-size: 1.2rem; }
