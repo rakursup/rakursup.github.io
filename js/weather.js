@@ -22,7 +22,7 @@ const WEATHER_DEFAULTS = ['pattaya', 'arkh', 'nhatrang'];
 //   слот 0 → Таиланд, слот 1 → Россия, слот 2 → Вьетнам
 const CITIES_DB = [
   {
-    country: 'Таиланд',
+    country: '🇹🇭 Таиланд',
     cities: [
       { id: 'pattaya',    name: 'Паттайя',    icon: '🏖️', lat: 12.9236, lon: 100.8825, zone: 'Asia/Bangkok' },
       { id: 'bangkok',    name: 'Бангкок',    icon: '🏙️', lat: 13.7563, lon: 100.5018, zone: 'Asia/Bangkok' },
@@ -37,7 +37,7 @@ const CITIES_DB = [
     ]
   },
   {
-    country: 'Россия',
+    country: '🇷🇺 Россия',
     cities: [
       { id: 'kaliningrad', name: 'Калининград',           icon: '🏰', lat: 54.7104, lon: 20.4522,  zone: 'Europe/Kaliningrad' },
       { id: 'moscow',      name: 'Москва',                icon: '🏛️', lat: 55.7558, lon: 37.6173,  zone: 'Europe/Moscow' },
@@ -52,7 +52,7 @@ const CITIES_DB = [
     ]
   },
   {
-    country: 'Вьетнам',
+    country: '🇻🇳 Вьетнам',
     cities: [
       { id: 'nhatrang',  name: 'Нячанг',    icon: '🌴', lat: 12.2388, lon: 109.1967, zone: 'Asia/Ho_Chi_Minh' },
       { id: 'hanoi',     name: 'Ханой',     icon: '🏯', lat: 21.0285, lon: 105.8542, zone: 'Asia/Ho_Chi_Minh' },
