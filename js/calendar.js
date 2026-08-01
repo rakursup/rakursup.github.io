@@ -8,41 +8,47 @@ const calPrevBtn = document.getElementById('cal-prev-month');
 const calNextBtn = document.getElementById('cal-next-month');
 let currentCalDate = new Date(); // Текущий отображаемый месяц
 
-// Отрисовывает календарь на указанную дату
+// Отрисовывает календарь на указанную дату.
+// Сетка всегда 6 недель (42 ячейки) — высота блока постоянная,
+// соседние блоки не «скачут» при смене месяца
 function renderCalendar(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
-    const firstDay = new Date(year, month, 1).getDay(); // День недели первого числа
-    const lastDate = new Date(year, month + 1, 0).getDate(); // Кол-во дней в месяце
+    const firstDay = new Date(year, month, 1).getDay(); // День недели первого числа (0 = вс)
     const today = new Date();
 
     calMonthYear.textContent = date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
     calGrid.innerHTML = '';
 
-    // Добавляем "пустые" дни предыдущего месяца
-    for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) {
-        const dayCell = document.createElement('div');
-        dayCell.className = 'calendar-day other-month';
-        dayCell.textContent = new Date(year, month, i - (firstDay === 0 ? 6 : firstDay - 1) + 1).getDate();
-        calGrid.appendChild(dayCell);
-    }
+    // Ячеек предыдущего месяца в начале (неделя с понедельника)
+    const leadDays = (firstDay + 6) % 7;
 
-    // Добавляем дни текущего месяца
-    for (let i = 1; i <= lastDate; i++) {
+    // Всегда 42 ячейки: i - leadDays + 1 даёт номер дня относительно 1-го числа,
+    // new Date сам переносит отрицательные и лишние числа в соседние месяцы
+    for (let i = 0; i < 42; i++) {
+        const cellDate = new Date(year, month, i - leadDays + 1);
         const dayCell = document.createElement('div');
         dayCell.className = 'calendar-day';
-        dayCell.textContent = i;
+        dayCell.textContent = cellDate.getDate();
+
+        // Дни соседних месяцев — приглушённые
+        if (cellDate.getMonth() !== month) {
+            dayCell.classList.add('other-month');
+        }
         // Подсвечиваем сегодняшний день
-        if (today.getFullYear() === year && today.getMonth() === month && today.getDate() === i) {
+        if (today.getFullYear() === cellDate.getFullYear() &&
+            today.getMonth() === cellDate.getMonth() &&
+            today.getDate() === cellDate.getDate()) {
             dayCell.classList.add('today');
         }
         calGrid.appendChild(dayCell);
     }
 }
 
-// Кнопки навигации: предыдущий/следующий месяц
+// Кнопки навигации: предыдущий/следующий месяц.
+// setDate(1) — защита от переполнения: 31-е число не «перескочит» короткий месяц
 calPrevBtn.addEventListener('click', () => {
-    currentCalDate.setDate(1); // ✔ защита: 31-е число не переполнит короткий месяц
+    currentCalDate.setDate(1);
     currentCalDate.setMonth(currentCalDate.getMonth() - 1);
     renderCalendar(currentCalDate);
 });
