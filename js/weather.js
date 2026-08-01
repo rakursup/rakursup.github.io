@@ -41,7 +41,7 @@ const CITIES_DB = [
     cities: [
       { id: 'kaliningrad', name: 'Калининград',           icon: '🏰', lat: 54.7104, lon: 20.4522,  zone: 'Europe/Kaliningrad' },
       { id: 'moscow',      name: 'Москва',                icon: '🏛️', lat: 55.7558, lon: 37.6173,  zone: 'Europe/Moscow' },
-      { id: 'arkh',        name: 'Архангельск',           icon: '🏔️', lat: 64.5401, lon: 40.5433,  zone: 'Europe/Moscow' },
+      { id: 'arkh',        name: 'Архангельск',           icon: '🌲', lat: 64.5401, lon: 40.5433,  zone: 'Europe/Moscow' },
       { id: 'samara',      name: 'Самара',                icon: '🌊', lat: 53.1959, lon: 50.1002,  zone: 'Europe/Samara' },
       { id: 'ekb',         name: 'Екатеринбург',          icon: '⛰️', lat: 56.8389, lon: 60.6057,  zone: 'Asia/Yekaterinburg' },
       { id: 'omsk',        name: 'Омск',                  icon: '🌾', lat: 54.9885, lon: 73.3242,  zone: 'Asia/Omsk' },
