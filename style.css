@@ -466,7 +466,9 @@ body.eco-active .panel-block,
 body.eco-active .btn-add-card,
 body.eco-active .search-box,
 body.eco-active .custom-select-trigger,
-body.eco-active .custom-options {
+body.eco-active .custom-options,
+body.eco-active .weather-city-trigger,
+body.eco-active .weather-city-options {
     background: var(--bg-secondary);
 }
 

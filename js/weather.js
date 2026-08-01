@@ -114,12 +114,14 @@ function getSlotCity(slotIndex) {
 
 // ===== СЕЛЕКТЫ (выпадающие списки городов) =====
 
-// Строит список опций для слота и заполняет его в DOM
+// Строит список опций для слота и заполняет его в DOM.
+// Перестраивает только содержимое (innerHTML) и текст триггера —
+// клики обрабатывает один делегированный слушатель на .weather-grid,
+// поэтому при перестройке списка обработчики не дублируются
 function buildCitySelect(slotIndex) {
   var item = document.querySelector('.weather-item[data-slot="' + slotIndex + '"]');
   if (!item) return;
   var optionsList = item.querySelector('.weather-city-options');
-  var trigger = item.querySelector('.weather-city-trigger');
   var nameSpan = item.querySelector('.weather-city-name');
   var group = CITIES_DB[slotIndex];
   var activeId = currentCities[slotIndex];
@@ -141,26 +143,6 @@ function buildCitySelect(slotIndex) {
     nameSpan.textContent = label;
     nameSpan.title = label;
   }
-
-  // Клик по городу в списке
-  optionsList.addEventListener('click', function (e) {
-    var li = e.target;
-    while (li && li.tagName !== 'LI') li = li.parentElement;
-    if (!li || !li.getAttribute('data-id')) return;
-    selectCity(slotIndex, li.getAttribute('data-id'));
-    closeAllSelects();
-  });
-
-  // Открытие/закрытие по клику на триггер
-  trigger.addEventListener('click', function (e) {
-    e.stopPropagation();
-    var isOpen = optionsList.classList.contains('active');
-    closeAllSelects();
-    if (!isOpen) {
-      optionsList.classList.add('active');
-      trigger.setAttribute('aria-expanded', 'true');
-    }
-  });
 }
 
 // Закрывает все открытые селекты
@@ -174,6 +156,33 @@ function closeAllSelects() {
     triggers[j].setAttribute('aria-expanded', 'false');
   }
 }
+
+// Единый обработчик кликов для всех трёх селектов (делегирование —
+// тот же подход, что в app.js для кнопок закладок). Слушатель ставится
+// один раз и не дублируется при перестройке списков
+document.querySelector('.weather-grid').addEventListener('click', function (e) {
+  // Клик по городу в открытом списке
+  var li = e.target.closest('li[data-id]');
+  if (li) {
+    var item = li.closest('.weather-item');
+    if (item) selectCity(parseInt(item.dataset.slot, 10), li.dataset.id);
+    closeAllSelects();
+    return;
+  }
+
+  // Клик по триггеру — открыть/закрыть список
+  var trigger = e.target.closest('.weather-city-trigger');
+  if (trigger) {
+    e.stopPropagation();
+    var optionsList = trigger.parentElement.querySelector('.weather-city-options');
+    var isOpen = optionsList.classList.contains('active');
+    closeAllSelects();
+    if (!isOpen) {
+      optionsList.classList.add('active');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+  }
+});
 
 // Закрытие по клику вне селекта
 document.addEventListener('click', function () {
