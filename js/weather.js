@@ -286,7 +286,8 @@ function saveWeatherCache(data) {
   } catch (e) {}
 }
 
-// Запрос погоды для одного слота
+// Запрос погоды для одного слота.
+// Возвращает Promise — его использует fetchAllWeather и кнопка обновления
 function fetchSlotWeather(slotIndex) {
   var city = getSlotCity(slotIndex);
   if (!city) return;
@@ -294,7 +295,7 @@ function fetchSlotWeather(slotIndex) {
   var controller = new AbortController();
   var timer = setTimeout(function () { controller.abort(); }, WEATHER_FETCH_TIMEOUT);
 
-  fetch('https://api.open-meteo.com/v1/forecast?latitude=' + city.lat + '&longitude=' + city.lon + '&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto', { signal: controller.signal })
+  return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + city.lat + '&longitude=' + city.lon + '&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&timezone=auto', { signal: controller.signal })
     .then(function (r) { return r.json(); })
     .then(function (d) {
       displayWeather(slotIndex, d.current);
@@ -320,12 +321,29 @@ function fetchSlotWeather(slotIndex) {
     .finally(function () { clearTimeout(timer); });
 }
 
-// Запрос погоды для всех трёх слотов
+// Запрос погоды для всех трёх слотов.
+// Возвращает Promise — его ждёт кнопка принудительного обновления,
+// чтобы остановить вращение иконки по завершении всех запросов
 function fetchAllWeather() {
+  var promises = [];
   for (var i = 0; i < 3; i++) {
-    fetchSlotWeather(i);
+    promises.push(fetchSlotWeather(i));
   }
+  return Promise.all(promises);
 }
+
+// ===== КНОПКА ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ =====
+// Обновляет погоду без перезагрузки страницы. Иконка вращается, пока идут
+// запросы; повторные клики во время загрузки игнорируются
+var weatherRefreshBtn = document.getElementById('weather-refresh');
+function stopRefreshSpin() {
+  weatherRefreshBtn.classList.remove('spinning');
+}
+weatherRefreshBtn.addEventListener('click', function () {
+  if (weatherRefreshBtn.classList.contains('spinning')) return;
+  weatherRefreshBtn.classList.add('spinning');
+  fetchAllWeather().then(stopRefreshSpin, stopRefreshSpin);
+});
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 

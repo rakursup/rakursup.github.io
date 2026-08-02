@@ -111,6 +111,11 @@
         <!-- ──────── 🌍 НАЧАЛО: ПОГОДА → js/weather.js ──────── -->
         <div class="panel-block weather-section">
             <div class="panel-title">🌍 Погода и время</div>
+            <!-- Кнопка принудительного обновления погоды (без перезагрузки
+                 страницы). Иконка вращается, пока идут запросы — weather.js -->
+            <button class="weather-refresh" id="weather-refresh" title="Обновить погоду" aria-label="Обновить погоду">
+                <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            </button>
             <div class="weather-grid">
                 <div class="weather-item" data-slot="0">
                     <div class="weather-city-select">

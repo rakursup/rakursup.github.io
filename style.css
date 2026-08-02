@@ -224,7 +224,8 @@ body.editing .card-drag-handle { display: flex; }
 .panel-title { text-align: center; color: var(--text); font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 1.5px; text-transform: uppercase; width: 100%; flex-shrink: 0; }
 .weather-section > .panel-title, .currency-section > .panel-title, .radio-section > .panel-title, .pomodoro-section > .panel-title { border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 
-.weather-section { grid-column: span 2; min-width: auto; }
+/* position: relative — точка отсчёта для кнопки обновления (.weather-refresh) */
+.weather-section { grid-column: span 2; min-width: auto; position: relative; }
 .weather-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; flex: 1; align-content: center; }
 .weather-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: var(--weather-bg); border-radius: 8px; min-width: 0; }
 .weather-item > * + * { margin-top: 8px; }
@@ -246,6 +247,23 @@ body.editing .card-drag-handle { display: flex; }
 .weather-details { display: flex; justify-content: center; align-items: center; }
 .weather-details > * + * { margin-left: 8px; }
 .weather-details { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Кнопка принудительного обновления погоды — правый верхний угол блока.
+   Иконка та же, что у кнопки сброса в футере (круговая стрелка) */
+.weather-refresh {
+    position: absolute; top: 16px; right: 20px;
+    width: 30px; height: 30px; border-radius: 8px;
+    background: transparent; border: 1px solid transparent;
+    color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+.weather-refresh:hover { color: var(--accent); border-color: var(--border); }
+.weather-refresh svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+/* Вращение иконки, пока идут запросы (в эко-режиме анимация
+   отключается общим правилом body.eco-active *) */
+.weather-refresh.spinning svg { animation: weather-spin 0.8s linear infinite; }
+@keyframes weather-spin { to { transform: rotate(-360deg); } }
 
 /* ── Селект выбора города в блоке погоды ──
    Компактная версия кастомного селекта поисковика */
@@ -542,6 +560,10 @@ body.eco-active *:active {
     .weather-icon { font-size: 1.3rem; }
     .weather-details { flex-direction: column; }
     .weather-details > * + * { margin-left: 0; margin-top: 2px; }
+
+    /* Кнопка обновления компактнее и ближе к углу */
+    .weather-refresh { top: 12px; right: 12px; width: 26px; height: 26px; }
+    .weather-refresh svg { width: 14px; height: 14px; }
 
     .pomodoro-time { font-size: 2.2rem; }
     #notes-input { height: 180px; }
