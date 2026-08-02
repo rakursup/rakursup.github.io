@@ -248,7 +248,9 @@ var wCodes = {
   96: { i: '⛈️', d: 'Гроза с градом' }, 99: { i: '⛈️', d: 'Сильная гроза с градом' }
 };
 
-// Отрисовка погоды для слота
+// Отрисовка погоды для слота.
+// Описание (info.d) может обрезаться многоточием в узкой ячейке (см. style.css),
+// поэтому полный текст дублируем в title — он же всплывающая подсказка
 function displayWeather(slotIndex, data) {
   var t = Math.round(data.temperature_2m);
   var w = Math.round(data.wind_speed_10m);
@@ -258,7 +260,7 @@ function displayWeather(slotIndex, data) {
   if (el) {
     el.innerHTML =
       '<div class="weather-main"><span class="weather-icon">' + info.i + '</span><span class="weather-temp">' + t + '°C</span></div>' +
-      '<div class="weather-desc">' + info.d + '</div>' +
+      '<div class="weather-desc" title="' + info.d + '">' + info.d + '</div>' +
       '<div class="weather-details"><span>💨 ' + w + '</span><span>💧 ' + h + '%</span></div>';
   }
 }

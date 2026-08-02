@@ -231,12 +231,19 @@ body.editing .card-drag-handle { display: flex; }
 .weather-city { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-align: center; }
 .weather-time { font-family: 'Inter', 'SF Mono', 'Consolas', monospace; font-size: 2.0rem; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
 .weather-divider { width: 60%; height: 1px; background: var(--border); margin: 0; }
-.weather-main { display: flex; align-items: center; }
+/* Контейнер погоды (#weather-0/1/2) растягивается на всю ширину ячейки
+   (align-self: stretch) — без этого он подгоняется по содержимому, и
+   описание погоды не получается обрезать многоточием. Иконка+температура
+   и детали центрируются внутри уже широкого контейнера */
+#weather-0, #weather-1, #weather-2 { align-self: stretch; }
+.weather-main { display: flex; align-items: center; justify-content: center; }
 .weather-main > * + * { margin-left: 8px; }
 .weather-icon { font-size: 1.6rem; }
 .weather-temp { font-weight: 700; color: var(--text); font-size: 1.25rem; }
-.weather-desc { font-size: 0.8rem; color: var(--text-muted); text-transform: capitalize; }
-.weather-details { display: flex; }
+/* Описание погоды: по центру, длинные значения («Сильная гроза с градом»)
+   обрезаются многоточием, полный текст — в title (ставит weather.js) */
+.weather-desc { font-size: 0.8rem; color: var(--text-muted); text-transform: capitalize; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.weather-details { display: flex; justify-content: center; align-items: center; }
 .weather-details > * + * { margin-left: 8px; }
 .weather-details { font-size: 0.8rem; color: var(--text-muted); }
 
