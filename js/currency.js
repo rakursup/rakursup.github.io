@@ -2,9 +2,10 @@
 // КУРСЫ ВАЛЮТ — показывает курсы THB, CNY, USD, EUR к RUB
 // ============================================================
 
-// Два интервала обновления — обычный и экономичный
-const CURRENCY_UPDATE_NORMAL = 60 * 60 * 1000;   // 1 час
-const CURRENCY_UPDATE_ECO = 6 * 60 * 60 * 1000;  // 6 часов
+// Интервалы обновления. Бесплатный тариф exchangerate-api обновляет курсы
+// раз в сутки, поэтому опрашивать чаще бессмысленно — только расход лимита
+const CURRENCY_UPDATE_NORMAL = 6 * 60 * 60 * 1000;   // 6 часов
+const CURRENCY_UPDATE_ECO = 24 * 60 * 60 * 1000;     // 24 часа
 
 const CURRENCY_FETCH_TIMEOUT = 10000;            // Таймаут запроса, 10 секунд
 const CURRENCY_CACHE_KEY = 'dashboard_currency_cache'; // Кэш на случай офлайна
