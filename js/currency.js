@@ -18,8 +18,22 @@ const CURRENCY_PAIRS = [
   { from: 'EUR', to: 'RUB', flag: '🇪🇺', label: 'EUR → RUB' }
 ];
 
-// Отрисовывает список курсов (rates — объект из API или из кэша)
-function renderCurrencies(rates, dateStr, fromCache = false) {
+// Форматирует время следующего обновления в московском часовом поясе.
+// На входе — unix-штамп (секунды) из поля time_next_update_unix
+function formatNextUpdate(unixSec) {
+  if (!unixSec) return '';
+  var d = new Date(unixSec * 1000);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+// Отрисовывает список курсов (rates — объект из API или из кэша).
+// nextUnix — время следующего обновления (unix, сек); выводится второй
+// строкой в московском поясе, чтобы был виден реальный возраст курса
+function renderCurrencies(rates, dateStr, nextUnix, fromCache = false) {
   const container = document.getElementById('currency-list'), dateEl = document.getElementById('currency-date');
   let html = '';
   CURRENCY_PAIRS.forEach(pair => {
@@ -27,7 +41,9 @@ function renderCurrencies(rates, dateStr, fromCache = false) {
     html += `<div class="currency-row"><div class="currency-pair"><span class="currency-flag">${pair.flag}</span><span>${pair.label}</span></div><div><span class="currency-rate">${r ? (1 / r).toFixed(2) : '--'} ₽</span></div></div>`;
   });
   container.innerHTML = html;
-  dateEl.textContent = `Обновлено: ${dateStr}${fromCache ? ' (кэш)' : ''}`;
+  const nextStr = formatNextUpdate(nextUnix);
+  dateEl.innerHTML = `Обновлено: ${dateStr}${fromCache ? ' (кэш)' : ''}` +
+    (nextStr ? `<span class="currency-next">Обновится: ${nextStr} МСК</span>` : '');
 }
 
 // Запрашивает курсы с API exchangerate-api.com (бесплатно).
@@ -40,15 +56,15 @@ async function fetchCurrencies() {
   try {
     const res = await fetch('https://api.exchangerate-api.com/v4/latest/RUB', { signal: controller.signal });
     const data = await res.json();
-    renderCurrencies(data.rates, new Date(data.date).toLocaleDateString('ru-RU'));
+    renderCurrencies(data.rates, new Date(data.date).toLocaleDateString('ru-RU'), data.time_next_update_unix);
     // Сохраняем на случай офлайн-старта
-    safeSetItem(CURRENCY_CACHE_KEY, JSON.stringify({ rates: data.rates, date: data.date }));
+    safeSetItem(CURRENCY_CACHE_KEY, JSON.stringify({ rates: data.rates, date: data.date, next: data.time_next_update_unix }));
   } catch (e) {
     // Нет связи — показываем последний сохранённый курс, если есть
     try {
       const cached = JSON.parse(localStorage.getItem(CURRENCY_CACHE_KEY));
       if (cached && cached.rates) {
-        renderCurrencies(cached.rates, new Date(cached.date).toLocaleDateString('ru-RU'), true);
+        renderCurrencies(cached.rates, new Date(cached.date).toLocaleDateString('ru-RU'), cached.next, true);
         return;
       }
     } catch (cacheErr) {}
