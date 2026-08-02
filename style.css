@@ -401,10 +401,24 @@ body.editing .card-drag-handle { display: flex; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; flex: 0 0 auto; }
 .calendar-day { display: flex; align-items: center; justify-content: center; min-height: 1.5rem; padding: 2px 0; border-radius: 6px; font-size: 0.95rem; cursor: default; transition: background-color 0.2s; font-variant-numeric: tabular-nums; }
 .calendar-day:hover { background: var(--weather-bg); }
-.calendar-day.today { background: var(--accent); color: white; font-weight: 600; }
 .calendar-day.other-month { color: var(--text-muted); opacity: 0.6; }
-/* День с заметкой — зелёная рамка + лёгкая подсветка (calendar.js) */
+/* День с заметкой — зелёная рамка (будущий день) + лёгкая подсветка */
 .calendar-day.has-note { border: 1px solid #4caf50; background: rgba(76, 175, 80, 0.12); }
+/* Прошедший день с заметкой — бледно-серая рамка (запись уже неактуальна) */
+.calendar-day.note-past { border-color: rgba(128, 128, 128, 0.4); background: rgba(128, 128, 128, 0.08); }
+/* Сегодня с заметкой — красная рамка. Ячейка «сегодня» залита акцентным
+   цветом, поэтому под рамкой контрастная подложка: в светлой теме белая,
+   в тёмной — тёмная (иначе рамка сливается с акцентом) */
+.calendar-day.note-today {
+    border: 2px solid var(--danger);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+[data-theme="dark"] .calendar-day.note-today {
+    box-shadow: inset 0 0 0 2px #242424;
+}
+/* Сегодня — намеренно после заметок: синий фон и белый текст должны
+   победить подсветку has-note/note-past у сегодняшнего дня с записью */
+.calendar-day.today { background: var(--accent); color: white; font-weight: 600; }
 /* В режиме редактирования заметок дни кликабельны */
 .calendar-grid.editing .calendar-day { cursor: pointer; }
 .calendar-grid.editing .calendar-day:hover { background: rgba(32, 106, 155, 0.15); }

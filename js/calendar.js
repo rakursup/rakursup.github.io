@@ -74,14 +74,24 @@ function renderCalendar(date) {
     dayCell.dataset.date = key;
 
     if (cellDate.getMonth() !== month) dayCell.classList.add('other-month');
-    if (today.getFullYear() === cellDate.getFullYear() &&
-        today.getMonth() === cellDate.getMonth() &&
-        today.getDate() === cellDate.getDate()) dayCell.classList.add('today');
+
+    const isToday = (today.getFullYear() === cellDate.getFullYear() &&
+                     today.getMonth() === cellDate.getMonth() &&
+                     today.getDate() === cellDate.getDate());
+    if (isToday) dayCell.classList.add('today');
 
     const note = calNotes[key];
     if (note) {
       dayCell.classList.add('has-note');
       dayCell.title = note; // наведение (десктоп) показывает текст записи
+      // Цвет рамки: сегодня — красная, прошедший день — серая, будущий — зелёная
+      if (isToday) {
+        dayCell.classList.add('note-today');
+      } else {
+        const cellDay = new Date(cellDate.getFullYear(), cellDate.getMonth(), cellDate.getDate());
+        const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        if (cellDay < todayDay) dayCell.classList.add('note-past');
+      }
     }
     calGrid.appendChild(dayCell);
   }
