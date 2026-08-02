@@ -455,6 +455,14 @@ searchForm.addEventListener('submit', function(e) {
     }
 });
 
+// Автофокус поля поиска — только на устройствах с мышью/тачпадом.
+// На смартфонах и планшетах фокус при загрузке открывает экранную
+// клавиатуру и перекидывает страницу снизу вверх — это мешает, а не помогает.
+// (pointer: coarse) — основной указатель сенсорный; ontouchstart —
+// запасная проверка для старых браузеров
+const hasCoarsePointer = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
+if (!hasCoarsePointer) qInput.focus();
+
 // ===== ЭКСПОРТ / ИМПОРТ (ЗАКЛАДКИ + ЗАМЕТКИ КАЛЕНДАРЯ) =====
 // Проверяет, что массив закладок имеет правильную структуру
 function validateBookmarks(data) {

@@ -64,7 +64,10 @@
                     <li data-value="shodan" role="option">Shodan</li>
                 </ul>
             </div>
-            <input type="text" id="q" placeholder="Поиск в интернете..." autofocus autocomplete="off">
+            <!-- autofocus убран: на мобильных фокус при загрузке открывает
+                 клавиатуру и дёргает страницу. Фокус ставит app.js — только
+                 на устройствах с мышью/тачпадом -->
+            <input type="text" id="q" placeholder="Поиск в интернете..." autocomplete="off">
             <button type="submit">Найти</button>
         </form>
         <div class="header-actions">
