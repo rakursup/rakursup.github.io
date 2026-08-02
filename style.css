@@ -325,6 +325,7 @@ body.editing .card-drag-handle { display: flex; }
 
 /* position: relative — точка отсчёта для кнопки обновления (.currency-refresh) */
 .currency-section { grid-column: span 1; min-width: auto; position: relative; }
+/* Список курсов прижат к низу блока, чтобы строки не размазывались по высоте */
 .currency-list { display: flex; flex-direction: column; flex: 1; justify-content: flex-end; }
 .currency-list > * + * { margin-top: 1px; }
 .currency-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: var(--weather-bg); border-radius: 6px; }
@@ -333,9 +334,8 @@ body.editing .card-drag-handle { display: flex; }
 .currency-pair { font-size: 0.95rem; color: var(--text-muted); }
 .currency-flag { font-size: 1.2rem; }
 .currency-rate { font-family: 'Inter', 'SF Mono', 'Consolas', monospace; font-weight: 600; color: var(--text); }
-.currency-date { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
-/* Вторая строка даты валют — время следующего обновления (приглушённая) */
-.currency-next { display: block; font-size: 0.75rem; opacity: 0.7; margin-top: 2px; }
+/* Время следующего обновления — внизу блока, приглушённая (вторичная информация) */
+.currency-date { text-align: center; font-size: 0.75rem; color: var(--text-muted); opacity: 0.7; margin-top: 8px; }
 
 .radio-section { grid-column: span 1; min-width: auto; }
 .radio-player { display: flex; flex-direction: column; align-items: center; flex: 1; justify-content: center; }

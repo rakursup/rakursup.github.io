@@ -19,7 +19,7 @@ const CURRENCY_PAIRS = [
 ];
 
 // Форматирует время следующего обновления в московском часовом поясе.
-// На входе — unix-штамп (секунды) из поля time_next_update_unix
+// На входе — unix-штамп (секунды)
 function formatNextUpdate(unixSec) {
   if (!unixSec) return '';
   var d = new Date(unixSec * 1000);
@@ -31,10 +31,11 @@ function formatNextUpdate(unixSec) {
 }
 
 // Отрисовывает список курсов (rates — объект из API или из кэша).
-// nextUnix — время следующего обновления (unix, сек); выводится второй
-// строкой в московском поясе, чтобы был виден реальный возраст курса
-function renderCurrencies(rates, dateStr, nextUnix, fromCache = false) {
-  const container = document.getElementById('currency-list'), dateEl = document.getElementById('currency-date');
+// Внизу блока выводится время следующего обновления (#currency-date) —
+// по нему понятно и когда курсы были получены (за сутки до этого)
+function renderCurrencies(rates, nextUnix) {
+  const container = document.getElementById('currency-list');
+  const dateEl = document.getElementById('currency-date');
   let html = '';
   CURRENCY_PAIRS.forEach(pair => {
     const r = rates[pair.from];
@@ -42,29 +43,33 @@ function renderCurrencies(rates, dateStr, nextUnix, fromCache = false) {
   });
   container.innerHTML = html;
   const nextStr = formatNextUpdate(nextUnix);
-  dateEl.innerHTML = `Обновлено: ${dateStr}${fromCache ? ' (кэш)' : ''}` +
-    (nextStr ? `<span class="currency-next">Обновится: ${nextStr} МСК</span>` : '');
+  dateEl.textContent = nextStr ? `Обновится: ${nextStr} МСК` : '';
 }
 
 // Запрашивает курсы с API exchangerate-api.com (бесплатно).
 // async — значит возвращает Promise; его ждёт кнопка обновления,
 // чтобы остановить вращение иконки по завершении запроса
 async function fetchCurrencies() {
-  const container = document.getElementById('currency-list'), dateEl = document.getElementById('currency-date');
+  const container = document.getElementById('currency-list');
+  const dateEl = document.getElementById('currency-date');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CURRENCY_FETCH_TIMEOUT);
   try {
     const res = await fetch('https://api.exchangerate-api.com/v4/latest/RUB', { signal: controller.signal });
     const data = await res.json();
-    renderCurrencies(data.rates, new Date(data.date).toLocaleDateString('ru-RU'), data.time_next_update_unix);
+    // Бесплатный эндпоинт (v4) отдаёт только time_last_updated — момент
+    // последнего обновления. Курсы обновляются раз в сутки, поэтому
+    // следующее обновление = последнее + 24 часа (86400 сек)
+    const nextUpdate = data.time_last_updated ? data.time_last_updated + 86400 : null;
+    renderCurrencies(data.rates, nextUpdate);
     // Сохраняем на случай офлайн-старта
-    safeSetItem(CURRENCY_CACHE_KEY, JSON.stringify({ rates: data.rates, date: data.date, next: data.time_next_update_unix }));
+    safeSetItem(CURRENCY_CACHE_KEY, JSON.stringify({ rates: data.rates, date: data.date, next: nextUpdate }));
   } catch (e) {
     // Нет связи — показываем последний сохранённый курс, если есть
     try {
       const cached = JSON.parse(localStorage.getItem(CURRENCY_CACHE_KEY));
       if (cached && cached.rates) {
-        renderCurrencies(cached.rates, new Date(cached.date).toLocaleDateString('ru-RU'), cached.next, true);
+        renderCurrencies(cached.rates, cached.next);
         return;
       }
     } catch (cacheErr) {}
