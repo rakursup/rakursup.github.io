@@ -17,7 +17,9 @@ function renderCalendar(date) {
     const firstDay = new Date(year, month, 1).getDay(); // День недели первого числа (0 = вс)
     const today = new Date();
 
-    calMonthYear.textContent = date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+// «август 2026» без «г.»: русская локаль добавляет суффикс при month+year,
+// поэтому месяц и год собираем по отдельности
+    calMonthYear.textContent = date.toLocaleDateString('ru-RU', { month: 'long' }) + ' ' + year;
     calGrid.innerHTML = '';
 
     // Ячеек предыдущего месяца в начале (неделя с понедельника)
