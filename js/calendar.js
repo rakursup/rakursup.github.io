@@ -157,7 +157,8 @@ function closeCalModal() {
 }
 
 calModalSave.addEventListener('click', () => {
-  const text = calModalInput.value.trim();
+  // cleanNoteText (utils.js) убирает невидимые/управляющие символы
+  const text = cleanNoteText(calModalInput.value);
   if (text) calNotes[calModalKey] = text;
   else delete calNotes[calModalKey]; // пусто — считаем удалением
   saveNotes();

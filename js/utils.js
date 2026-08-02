@@ -78,3 +78,12 @@ function sanitizeUrl(url) {
         return ['https:', 'http:', 'mailto:'].includes(p.protocol) ? trimmed : '#';
     } catch { return '#'; }
 }
+
+// Чистит текст коротких записей (заметки календаря): убирает управляющие
+// и невидимые символы (zero-width пробел, ZWNJ, BOM) — защиту от «кракозябр»
+// из вставленного текста, схлопывает повторные пробелы. Кириллицу и эмодзи
+// не трогает: zero-width joiner (\u200D) сохранён — он склеивает составные эмодзи
+function cleanNoteText(s) {
+    if (!s) return '';
+    return s.replace(/[\u0000-\u001F\u007F\u200B\u200C\uFEFF]/g, '').replace(/\s+/g, ' ').trim();
+}

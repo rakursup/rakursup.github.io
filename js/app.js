@@ -478,12 +478,16 @@ function validateBookmarks(data) {
 }
 
 // Приводит заметки календаря к безопасному виду: объект «дата → строка».
-// Всё лишнее (значения не-строки) отбрасывается
+// Значения не-строки отбрасываются, текст чистится cleanNoteText (utils.js)
+// от невидимых символов; записи, ставшие пустыми после очистки, не переносим
 function sanitizeCalendarNotes(notes) {
     if (!notes || typeof notes !== 'object' || Array.isArray(notes)) return {};
     const clean = {};
     for (const key in notes) {
-        if (typeof notes[key] === 'string') clean[key] = notes[key];
+        if (typeof notes[key] === 'string') {
+            const text = cleanNoteText(notes[key]);
+            if (text) clean[key] = text;
+        }
     }
     return clean;
 }
