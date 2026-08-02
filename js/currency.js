@@ -30,7 +30,9 @@ function renderCurrencies(rates, dateStr, fromCache = false) {
   dateEl.textContent = `Обновлено: ${dateStr}${fromCache ? ' (кэш)' : ''}`;
 }
 
-// Запрашивает курсы с API exchangerate-api.com (бесплатно)
+// Запрашивает курсы с API exchangerate-api.com (бесплатно).
+// async — значит возвращает Promise; его ждёт кнопка обновления,
+// чтобы остановить вращение иконки по завершении запроса
 async function fetchCurrencies() {
   const container = document.getElementById('currency-list'), dateEl = document.getElementById('currency-date');
   const controller = new AbortController();
@@ -56,6 +58,19 @@ async function fetchCurrencies() {
     clearTimeout(timer);
   }
 }
+
+// ===== КНОПКА ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ =====
+// Обновляет курсы без перезагрузки страницы. Иконка вращается, пока идёт
+// запрос; повторные клики во время загрузки игнорируются
+var currencyRefreshBtn = document.getElementById('currency-refresh');
+function stopCurrencySpin() {
+  currencyRefreshBtn.classList.remove('spinning');
+}
+currencyRefreshBtn.addEventListener('click', function () {
+  if (currencyRefreshBtn.classList.contains('spinning')) return;
+  currencyRefreshBtn.classList.add('spinning');
+  fetchCurrencies().then(stopCurrencySpin, stopCurrencySpin);
+});
 
 // Выбирает интервал в зависимости от экономичного режима
 function getCurrencyInterval() {

@@ -161,6 +161,11 @@
         <!-- ──────── 💱 НАЧАЛО: ВАЛЮТЫ → js/currency.js ──────── -->
         <div class="panel-block currency-section">
             <div class="panel-title">💱 Курсы валют</div>
+            <!-- Кнопка принудительного обновления курсов (без перезагрузки
+                 страницы). Иконка вращается, пока идёт запрос — currency.js -->
+            <button class="currency-refresh" id="currency-refresh" title="Обновить курсы" aria-label="Обновить курсы">
+                <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            </button>
             <div class="currency-list" id="currency-list">
                 <div class="currency-loading">Загрузка курсов...</div>
             </div>
