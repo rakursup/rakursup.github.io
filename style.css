@@ -299,7 +299,7 @@ body.editing .card-drag-handle { display: flex; }
 
 .currency-section { grid-column: span 1; min-width: auto; }
 .currency-list { display: flex; flex-direction: column; flex: 1; justify-content: flex-end; }
-.currency-list > * + * { margin-top: 2px; }
+.currency-list > * + * { margin-top: 1px; }
 .currency-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: var(--weather-bg); border-radius: 6px; }
 .currency-pair { display: flex; align-items: center; }
 .currency-pair > * + * { margin-left: 8px; }
@@ -366,10 +366,10 @@ body.editing .card-drag-handle { display: flex; }
 .calendar-header button { background: var(--bg-secondary); color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
 .calendar-header button:hover { background: var(--accent); color: white; }
 #cal-current-month-year { font-weight: 600; color: var(--text); font-feature-settings: 'ss01'; letter-spacing: -0.01em; }
-.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: 0.8rem; color: var(--text-muted); text-align: center; font-weight: 500; }
+.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.8rem; color: var(--text-muted); text-align: center; font-weight: 500; }
 .calendar-weekdays span { padding: 4px 0; }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; flex: 0 0 auto; }
-.calendar-day { display: flex; align-items: center; justify-content: center; min-height: 2rem; padding: 0.25rem 0; border-radius: 6px; font-size: 0.95rem; cursor: default; transition: background-color 0.2s; font-variant-numeric: tabular-nums; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; flex: 0 0 auto; }
+.calendar-day { display: flex; align-items: center; justify-content: center; min-height: 1.5rem; padding: 2px 0; border-radius: 6px; font-size: 0.95rem; cursor: default; transition: background-color 0.2s; font-variant-numeric: tabular-nums; }
 .calendar-day:hover { background: var(--weather-bg); }
 .calendar-day.today { background: var(--accent); color: white; font-weight: 600; }
 .calendar-day.other-month { color: var(--text-muted); opacity: 0.6; }
