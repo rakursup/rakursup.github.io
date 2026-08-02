@@ -298,8 +298,8 @@ body.editing .card-drag-handle { display: flex; }
 .weather-city-options li.country-label:hover { background: none; color: var(--text-muted); }
 
 .currency-section { grid-column: span 1; min-width: auto; }
-.currency-list { display: flex; flex-direction: column; flex: 1; justify-content: center; }
-.currency-list > * + * { margin-top: 8px; }
+.currency-list { display: flex; flex-direction: column; flex: 1; justify-content: flex-end; }
+.currency-list > * + * { margin-top: 2px; }
 .currency-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: var(--weather-bg); border-radius: 6px; }
 .currency-pair { display: flex; align-items: center; }
 .currency-pair > * + * { margin-left: 8px; }
