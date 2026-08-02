@@ -67,14 +67,23 @@ function escapeHtml(text) {
     return d.innerHTML;
 }
 
-// Проверяет, что URL безопасный (разрешены только http, https, mailto)
-// Блокирует опасные схемы javascript: и data: (например, javascript:alert(1))
+// Проверяет, что URL безопасный (разрешены только http, https, mailto).
+// Блокирует опасные схемы javascript: и data: (например, javascript:alert(1)).
+// Если протокол не указан (ya.ru, www.site.com), добавляет https:// — иначе
+// браузер сочтёт ссылку относительной и откроет 404 на текущем домене
 function sanitizeUrl(url) {
     if (!url) return '#';
-    const trimmed = url.trim();
+    let trimmed = url.trim();
     if (trimmed.toLowerCase().startsWith('javascript:') || trimmed.toLowerCase().startsWith('data:')) return '#';
+    // Определяем, есть ли протокол. Настоящая схема («https:», «mailto:») точек
+    // не содержит; если «схема» с точкой (ya.ru:8080) — это домен с портом,
+    // протокол не указан → тоже добавляем https://
+    const scheme = trimmed.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+    if (!scheme || scheme[1].includes('.')) {
+        trimmed = 'https://' + trimmed;
+    }
     try {
-        const p = new URL(trimmed, 'https://placeholder.invalid');
+        const p = new URL(trimmed);
         return ['https:', 'http:', 'mailto:'].includes(p.protocol) ? trimmed : '#';
     } catch { return '#'; }
 }

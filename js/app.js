@@ -114,7 +114,9 @@ document.getElementById('bookmarks-grid').addEventListener('click', (e) => {
             return;
         }
         openModal('Добавить ссылку', 'Название', true, (n, u) => {
-            bookmarks[ci].links.push({ name: n, url: u });
+            // sanitizeUrl нормализует URL (добавляет https:// при отсутствии
+            // протокола), чтобы ссылка не стала относительной и не вела на 404
+            bookmarks[ci].links.push({ name: n, url: sanitizeUrl(u) });
             saveBookmarks();
         });
     }
