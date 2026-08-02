@@ -1,64 +1,188 @@
 // ============================================================
-// КАЛЕНДАРЬ — показывает текущий месяц с навигацией
+// КАЛЕНДАРЬ — текущий месяц с навигацией + заметки на день
 // ============================================================
 
 const calGrid = document.getElementById('cal-grid');
 const calMonthYear = document.getElementById('cal-current-month-year');
 const calPrevBtn = document.getElementById('cal-prev-month');
 const calNextBtn = document.getElementById('cal-next-month');
-let currentCalDate = new Date(); // Текущий отображаемый месяц
+const calEditToggle = document.getElementById('cal-edit-toggle');
+let currentCalDate = new Date();
+let calEditing = false; // режим редактирования заметок
 
-// Отрисовывает календарь на указанную дату.
-// Сетка всегда 6 недель (42 ячейки) — высота блока постоянная,
-// соседние блоки не «скачут» при смене месяца
-function renderCalendar(date) {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1).getDay(); // День недели первого числа (0 = вс)
-    const today = new Date();
+// ===== ЗАМЕТКИ =====
+const CAL_NOTES_KEY = 'calendar_notes';
+const CAL_NOTES_TTL_DAYS = 60; // автоочистка: через 60 дней после дня записи
 
-// «Август 2026»: месяц с заглавной буквы, без суффикса «г.»
-    const monthName = date.toLocaleDateString('ru-RU', { month: 'long' });
-    calMonthYear.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1) + ' ' + year;
-    calGrid.innerHTML = '';
+let calNotes = loadNotes();
 
-    // Ячеек предыдущего месяца в начале (неделя с понедельника)
-    const leadDays = (firstDay + 6) % 7;
-
-    // Всегда 42 ячейки: i - leadDays + 1 даёт номер дня относительно 1-го числа,
-    // new Date сам переносит отрицательные и лишние числа в соседние месяцы
-    for (let i = 0; i < 42; i++) {
-        const cellDate = new Date(year, month, i - leadDays + 1);
-        const dayCell = document.createElement('div');
-        dayCell.className = 'calendar-day';
-        dayCell.textContent = cellDate.getDate();
-
-        // Дни соседних месяцев — приглушённые
-        if (cellDate.getMonth() !== month) {
-            dayCell.classList.add('other-month');
-        }
-        // Подсвечиваем сегодняшний день
-        if (today.getFullYear() === cellDate.getFullYear() &&
-            today.getMonth() === cellDate.getMonth() &&
-            today.getDate() === cellDate.getDate()) {
-            dayCell.classList.add('today');
-        }
-        calGrid.appendChild(dayCell);
-    }
+function loadNotes() {
+  try {
+    const s = localStorage.getItem(CAL_NOTES_KEY);
+    return s ? JSON.parse(s) : {};
+  } catch (e) { return {}; }
+}
+function saveNotes() {
+  safeSetItem(CAL_NOTES_KEY, JSON.stringify(calNotes));
 }
 
-// Кнопки навигации: предыдущий/следующий месяц.
-// setDate(1) — защита от переполнения: 31-е число не «перескочит» короткий месяц
+// Ключ даты — локальный (не UTC), формат ГГГГ-ММ-ДД.
+// Без padStart — его нет в старых браузерах
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function dateKey(y, m, d) { return y + '-' + pad2(m + 1) + '-' + pad2(d); }
+
+// Автоочистка: удаляем записи, у которых день наступил больше 60 дней назад.
+// Будущие записи не трогаются. Запускается при загрузке
+function cleanupExpiredNotes() {
+  const cutoff = Date.now() - CAL_NOTES_TTL_DAYS * 24 * 60 * 60 * 1000;
+  let changed = false;
+  for (const key in calNotes) {
+    const p = key.split('-');
+    const d = new Date(+p[0], +p[1] - 1, +p[2]);
+    if (d.getTime() < cutoff) { delete calNotes[key]; changed = true; }
+  }
+  if (changed) saveNotes();
+}
+
+// Доступ для экспорта/импорта (использует app.js)
+window.getCalendarNotes = function () { return calNotes; };
+window.setCalendarNotes = function (obj) {
+  calNotes = (obj && typeof obj === 'object') ? obj : {};
+  saveNotes();
+  renderCalendar(currentCalDate);
+};
+
+// ===== ОТРИСОВКА =====
+function renderCalendar(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDay = new Date(year, month, 1).getDay(); // 0 = вс
+  const today = new Date();
+
+  const monthName = date.toLocaleDateString('ru-RU', { month: 'long' });
+  calMonthYear.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1) + ' ' + year;
+  calGrid.innerHTML = '';
+
+  const leadDays = (firstDay + 6) % 7; // неделя с понедельника
+  // Всегда 42 ячейки (6 недель) — высота блока постоянная
+  for (let i = 0; i < 42; i++) {
+    const cellDate = new Date(year, month, i - leadDays + 1);
+    const key = dateKey(cellDate.getFullYear(), cellDate.getMonth(), cellDate.getDate());
+    const dayCell = document.createElement('div');
+    dayCell.className = 'calendar-day';
+    dayCell.textContent = cellDate.getDate();
+    dayCell.dataset.date = key;
+
+    if (cellDate.getMonth() !== month) dayCell.classList.add('other-month');
+    if (today.getFullYear() === cellDate.getFullYear() &&
+        today.getMonth() === cellDate.getMonth() &&
+        today.getDate() === cellDate.getDate()) dayCell.classList.add('today');
+
+    const note = calNotes[key];
+    if (note) {
+      dayCell.classList.add('has-note');
+      dayCell.title = note; // наведение (десктоп) показывает текст записи
+    }
+    calGrid.appendChild(dayCell);
+  }
+}
+
+// ===== РЕЖИМ РЕДАКТИРОВАНИЯ =====
+calEditToggle.addEventListener('click', () => {
+  calEditing = !calEditing;
+  calEditToggle.classList.toggle('active', calEditing);
+  calGrid.classList.toggle('editing', calEditing);
+});
+
+// Клик по дню: в режиме правки — редактор, в обычном — просмотр записи
+// (тач/клик). Дни без записи в обычном режиме не реагируют
+calGrid.addEventListener('click', (e) => {
+  const cell = e.target.closest('.calendar-day');
+  if (!cell) return;
+  const key = cell.dataset.date;
+  if (calEditing) openCalModal(key, 'edit');
+  else if (calNotes[key]) openCalModal(key, 'view');
+});
+
+// ===== МОДАЛКА ЗАМЕТКИ =====
+const calOverlay = document.getElementById('cal-modal-overlay');
+const calModalTitle = document.getElementById('cal-modal-title');
+const calModalView = document.getElementById('cal-modal-view');
+const calModalInput = document.getElementById('cal-modal-input');
+const calModalSave = document.getElementById('cal-modal-save');
+const calModalDelete = document.getElementById('cal-modal-delete');
+const calModalCancel = document.getElementById('cal-modal-cancel');
+let calModalKey = null;
+
+// «15 августа 2026» (без «г.»)
+function formatNoteDate(key) {
+  const p = key.split('-');
+  return new Date(+p[0], +p[1] - 1, +p[2])
+    .toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+    .replace(' г.', '');
+}
+
+function openCalModal(key, mode) {
+  calModalKey = key;
+  const note = calNotes[key] || '';
+  calModalTitle.textContent = 'Заметка на ' + formatNoteDate(key);
+
+  const isEdit = mode === 'edit';
+  calModalView.style.display = isEdit ? 'none' : 'block';
+  calModalInput.style.display = isEdit ? 'block' : 'none';
+  calModalSave.style.display = isEdit ? '' : 'none';
+  calModalDelete.style.display = (isEdit && note) ? '' : 'none';
+  calModalCancel.textContent = isEdit ? 'Отмена' : 'Закрыть';
+
+  if (isEdit) calModalInput.value = note;
+  else calModalView.textContent = note;
+
+  calOverlay.classList.add('active');
+  if (isEdit) calModalInput.focus();
+}
+
+function closeCalModal() {
+  calOverlay.classList.remove('active');
+  calModalKey = null;
+}
+
+calModalSave.addEventListener('click', () => {
+  const text = calModalInput.value.trim();
+  if (text) calNotes[calModalKey] = text;
+  else delete calNotes[calModalKey]; // пусто — считаем удалением
+  saveNotes();
+  renderCalendar(currentCalDate);
+  closeCalModal();
+});
+
+calModalDelete.addEventListener('click', () => {
+  delete calNotes[calModalKey];
+  saveNotes();
+  renderCalendar(currentCalDate);
+  closeCalModal();
+});
+
+calModalCancel.addEventListener('click', closeCalModal);
+calOverlay.addEventListener('click', (e) => { if (e.target === calOverlay) closeCalModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && calOverlay.classList.contains('active')) closeCalModal();
+});
+calModalInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') calModalSave.click();
+});
+
+// ===== НАВИГАЦИЯ =====
 calPrevBtn.addEventListener('click', () => {
-    currentCalDate.setDate(1);
-    currentCalDate.setMonth(currentCalDate.getMonth() - 1);
-    renderCalendar(currentCalDate);
+  currentCalDate.setDate(1); // защита от переполнения коротких месяцев
+  currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+  renderCalendar(currentCalDate);
 });
-
 calNextBtn.addEventListener('click', () => {
-    currentCalDate.setDate(1);
-    currentCalDate.setMonth(currentCalDate.getMonth() + 1);
-    renderCalendar(currentCalDate);
+  currentCalDate.setDate(1);
+  currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+  renderCalendar(currentCalDate);
 });
 
+// ===== СТАРТ =====
+cleanupExpiredNotes();
 renderCalendar(currentCalDate);

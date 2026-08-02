@@ -28,7 +28,7 @@ const DEFAULT_BOOKMARKS = [
     { title: '🛒 Товары & Маркеты', links: [{ name: 'Яндекс Маркет', url: 'https://market.yandex.ru/' }, { name: 'Wildberries', url: 'https://www.wildberries.ru/' }, { name: 'Ozon', url: 'https://www.ozon.ru/' }, { name: 'Авито', url: 'https://www.avito.ru/' }] },
     { title: '🏛️ Услуги & Сервисы', links: [{ name: 'Госуслуги', url: 'https://gosuslugi.ru/' }, { name: 'Авиасейлс', url: 'https://www.aviasales.ru/' }, { name: 'Сравни.ру', url: 'https://sravni.ru/' }, { name: 'Tutu.ru', url: 'https://www.tutu.ru/' }] },
     { title: '🗺️ Карты & Навигация', links: [{ name: 'Яндекс Карты', url: 'https://yandex.ru/maps/' }, { name: '2ГИС', url: 'https://2gis.ru/' }, { name: 'Google Maps', url: 'https://www.google.com/maps' }, { name: 'OpenStreetMap', url: 'https://www.openstreetmap.org/' }] },
-    { title: '📰 Новости & Инфо', links: [{ name: 'ТАСС', url: 'https://tass.ru/' }, { name: 'Интерфакс', url: 'https://www.interfax.ru/' }, { name: 'Lenta.ru', url: 'https://www.lenta.ru/' }, { name: 'Regnum', url: 'https://www.regnum.ru/' }] },
+    { title: '📰 Новости & Инфо', links: [{ name: 'ТАСС', url: 'https://tass.ru/' }, { name: 'Интерфакс', url: 'https://www.interfax.ru/' }, { name: 'Lenta.ru', url: 'https://lenta.ru/' }, { name: 'Regnum', url: 'https://www.regnum.ru/' }] },
     { title: '🛠️ Инструменты', links: [{ name: 'Яндекс Переводчик', url: 'https://translate.yandex.ru/' }, { name: 'Google Translate', url: 'https://translate.google.com/' }, { name: 'Gismeteo', url: 'https://gismeteo.ru/' }, { name: 'Say7', url: 'https://www.say7.info/' }] },
     { title: '💻 Разработка', links: [{ name: 'GitHub', url: 'https://github.com/' }, { name: 'Stack Overflow', url: 'https://stackoverflow.com/' }, { name: 'ChatGPT', url: 'https://chat.openai.com/' }, { name: 'MDN Web Docs', url: 'https://developer.mozilla.org/' }, { name: 'Docker Hub', url: 'https://hub.docker.com/' }, { name: 'CodePen', url: 'https://codepen.io/' }] },
     { title: '☁️ Облака', links: [{ name: 'Яндекс Диск', url: 'https://disk.yandex.ru/' }, { name: 'Google Drive', url: 'https://drive.google.com/' }, { name: 'Облако Mail.ru', url: 'https://cloud.mail.ru/' }, { name: 'Dropbox', url: 'https://www.dropbox.com/' }, { name: 'MEGA', url: 'https://mega.nz/' }, { name: 'OneDrive', url: 'https://onedrive.live.com/' }] },
@@ -455,8 +455,8 @@ searchForm.addEventListener('submit', function(e) {
     }
 });
 
-// ===== ЭКСПОРТ / ИМПОРТ ЗАКЛАДОК =====
-// Проверяет, что импортируемый файл имеет правильную структуру
+// ===== ЭКСПОРТ / ИМПОРТ (ЗАКЛАДКИ + ЗАМЕТКИ КАЛЕНДАРЯ) =====
+// Проверяет, что массив закладок имеет правильную структуру
 function validateBookmarks(data) {
     if (!Array.isArray(data)) return 'Файл должен содержать массив категорий';
     for (let i = 0; i < data.length; i++) {
@@ -469,11 +469,28 @@ function validateBookmarks(data) {
     return null;
 }
 
-// Скачивает все закладки в JSON-файл.
+// Приводит заметки календаря к безопасному виду: объект «дата → строка».
+// Всё лишнее (значения не-строки) отбрасывается
+function sanitizeCalendarNotes(notes) {
+    if (!notes || typeof notes !== 'object' || Array.isArray(notes)) return {};
+    const clean = {};
+    for (const key in notes) {
+        if (typeof notes[key] === 'string') clean[key] = notes[key];
+    }
+    return clean;
+}
+
+// Скачивает резервную копию (закладки + заметки календаря) в JSON-файл.
+// Формат: { bookmarks: [...], calendarNotes: {...} }. Импорт понимает и
+// старый формат (просто массив закладок) — см. обработчик импорта.
 // Через data-URI вместо Blob + URL.createObjectURL — так скачивание работает
 // и в старых браузерах (на планшете Blob-вариант не срабатывал)
 document.getElementById('btn-export').addEventListener('click', () => {
-    const json = JSON.stringify(bookmarks, null, 2);
+    const backup = {
+        bookmarks: bookmarks,
+        calendarNotes: (typeof window.getCalendarNotes === 'function') ? window.getCalendarNotes() : {}
+    };
+    const json = JSON.stringify(backup, null, 2);
     const a = document.createElement('a');
     a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
     a.download = `dashboard-backup-${new Date().toISOString().slice(0, 10)}.json`;
@@ -482,7 +499,8 @@ document.getElementById('btn-export').addEventListener('click', () => {
     document.body.removeChild(a);
 });
 
-// Загружает закладки из JSON-файла
+// Загружает резервную копию из JSON-файла. Понимает два формата:
+// старый (массив закладок) и новый ({ bookmarks, calendarNotes })
 document.getElementById('btn-import-trigger').addEventListener('click', () => document.getElementById('import-file').click());
 document.getElementById('import-file').addEventListener('change', function(e) {
     const file = e.target.files[0];
@@ -491,11 +509,29 @@ document.getElementById('import-file').addEventListener('change', function(e) {
     reader.onload = function(ev) {
         try {
             const data = JSON.parse(ev.target.result);
-            const err = validateBookmarks(data);
+            // Разбираем формат: массив = только закладки, объект = закладки + заметки
+            let importedBookmarks, importedNotes = null;
+            if (Array.isArray(data)) {
+                importedBookmarks = data;
+            } else if (data && typeof data === 'object' && Array.isArray(data.bookmarks)) {
+                importedBookmarks = data.bookmarks;
+                importedNotes = sanitizeCalendarNotes(data.calendarNotes);
+            } else {
+                alert('❌ Неверный формат файла');
+                return;
+            }
+            const err = validateBookmarks(importedBookmarks);
             if (err) { alert('❌ ' + err); return; }
-            if (confirm(`Импортировать ${data.length} категорий?\nТекущие закладки будут заменены.`)) {
-                bookmarks = data;
+            const notesCount = importedNotes ? Object.keys(importedNotes).length : 0;
+            let msg = `Импортировать ${importedBookmarks.length} категорий?`;
+            if (notesCount) msg += `\nЗаметок календаря: ${notesCount}.`;
+            msg += '\nТекущие данные будут заменены.';
+            if (confirm(msg)) {
+                bookmarks = importedBookmarks;
                 saveBookmarks();
+                if (importedNotes && typeof window.setCalendarNotes === 'function') {
+                    window.setCalendarNotes(importedNotes);
+                }
                 alert('✅ Успешно!');
             }
         } catch (err) { alert('❌ ' + err.message); }
