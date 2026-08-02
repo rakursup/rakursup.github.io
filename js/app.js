@@ -246,8 +246,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && mo.classLi
 document.getElementById('add-card-btn').addEventListener('click', () => openModal('Новая категория', 'Название', false, n => { bookmarks.push({ title: n, links: [] }); saveBookmarks(); }));
 
 // ===== ⚡ ЭКОНОМИЧНЫЙ РЕЖИМ =====
-// Ключ для сохранения состояния в localStorage
-const ECO_KEY = 'eco_mode';
+// Ключ для сохранения состояния в localStorage (с префиксом экземпляра)
+const ECO_KEY = storageKey('eco_mode');
 const ecoToggle = document.getElementById('eco-toggle');
 let isEcoMode = localStorage.getItem(ECO_KEY) === 'true';
 

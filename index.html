@@ -11,11 +11,26 @@
 
     <!-- Ставим тему ДО отрисовки, чтобы не было вспышки тёмной темы
          у пользователей со светлой темой. data-theme="dark" выше остаётся
-         как запасной вариант при отключённом JavaScript. -->
+         как запасной вариант при отключённом JavaScript.
+         Здесь же считается префикс экземпляра (window.__instancePrefix):
+         для file:// каждая папка получает свой, для http(s) он пустой.
+         Логика префикса должна совпадать с getInstancePrefix в js/utils.js -->
     <script>
         (function () {
             try {
-                var t = localStorage.getItem('theme') ||
+                var prefix = '';
+                if (location.protocol === 'file:') {
+                    var path = location.href;
+                    try { path = decodeURIComponent(path); } catch (e) {}
+                    path = path.split(/[?#]/)[0].replace(/\/[^\/]*$/, '');
+                    var h = 0;
+                    for (var i = 0; i < path.length; i++) {
+                        h = ((h << 5) - h + path.charCodeAt(i)) | 0;
+                    }
+                    prefix = 'i' + Math.abs(h) + '_';
+                }
+                window.__instancePrefix = prefix;
+                var t = localStorage.getItem(prefix + 'theme') ||
                     (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
                 document.documentElement.setAttribute('data-theme', t);
             } catch (e) {}

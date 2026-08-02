@@ -3,16 +3,48 @@
 // Этот файл загружается первым, так как другие файлы его используют
 // ============================================================
 
+// ===== ИДЕНТИФИКАТОР ЭКЗЕМПЛЯРА (разделение настроек по папкам) =====
+// Дашборд — локальная версия: копии в разных папках должны иметь раздельные
+// настройки, а скопированная папка — стартовать с дефолта. localStorage
+// привязан к origin, а все file:// страницы браузер считает одним origin,
+// поэтому к ключам добавляется префикс из пути к папке.
+// Для file:// у каждой папки свой путь → свой префикс → своё хранилище.
+// Для http(s) (GitHub, локальный сервер) префикс пустой — там разделение
+// уже обеспечивает origin, а настройки GitHub остаются прежними.
+// Префикс считается в inline-скрипте index.html (чтобы тема применилась до
+// отрисовки) и сохраняется в window.__instancePrefix; здесь используем его
+// с запасным расчётом. Логика должна совпадать с index.html
+function getInstancePrefix() {
+    if (typeof window.__instancePrefix === 'string') return window.__instancePrefix;
+    if (location.protocol !== 'file:') return '';
+    var path = location.href;
+    try { path = decodeURIComponent(path); } catch (e) {}
+    path = path.split(/[?#]/)[0].replace(/\/[^\/]*$/, '');
+    var h = 0;
+    for (var i = 0; i < path.length; i++) {
+        h = ((h << 5) - h + path.charCodeAt(i)) | 0;
+    }
+    return 'i' + Math.abs(h) + '_';
+}
+
+const INSTANCE_PREFIX = getInstancePrefix();
+
+// Собирает имя ключа с учётом префикса экземпляра.
+// Используется и для ключей, объявленных в других модулях (эко, заметки календаря)
+function storageKey(name) {
+    return INSTANCE_PREFIX + name;
+}
+
 // Ключи для сохранения данных в браузере (localStorage)
 // localStorage — это "память" браузера, данные не пропадают после закрытия
-const STORAGE_KEY = 'dashboard_bookmarks';      // Закладки
-const RADIO_STORAGE_KEY = 'dashboard_radio';    // Настройки радио
-const THEME_KEY = 'theme';                      // Тема (светлая/тёмная)
-const ACCENT_KEY = 'accent_color';              // Акцентный цвет
-const BG_KEY = 'bg_image';                      // Фоновое изображение
-const ENGINE_KEY = 'preferred_engine';          // Поисковик
-const NOTES_KEY = 'dashboard_notes';            // Заметки
-const POMO_KEY = 'dashboard_pomodoro';          // Помодоро-таймер
+const STORAGE_KEY = storageKey('dashboard_bookmarks');      // Закладки
+const RADIO_STORAGE_KEY = storageKey('dashboard_radio');    // Настройки радио
+const THEME_KEY = storageKey('theme');                      // Тема (светлая/тёмная)
+const ACCENT_KEY = storageKey('accent_color');              // Акцентный цвет
+const BG_KEY = storageKey('bg_image');                      // Фоновое изображение
+const ENGINE_KEY = storageKey('preferred_engine');          // Поисковик
+const NOTES_KEY = storageKey('dashboard_notes');            // Заметки
+const POMO_KEY = storageKey('dashboard_pomodoro');          // Помодоро-таймер
 
 // Безопасное сохранение в localStorage
 // Если хранилище переполнено — пытается очистить старые данные

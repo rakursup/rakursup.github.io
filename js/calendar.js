@@ -11,7 +11,9 @@ let currentCalDate = new Date();
 let calEditing = false; // режим редактирования заметок
 
 // ===== ЗАМЕТКИ =====
-const CAL_NOTES_KEY = 'calendar_notes';
+// Ключ с префиксом экземпляра (storageKey из utils.js) — у каждой локальной
+// папки свои заметки календаря
+const CAL_NOTES_KEY = storageKey('calendar_notes');
 const CAL_NOTES_TTL_DAYS = 60; // автоочистка: через 60 дней после дня записи
 
 let calNotes = loadNotes();
