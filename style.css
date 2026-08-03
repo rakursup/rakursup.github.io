@@ -224,10 +224,15 @@ body.editing .card-drag-handle { display: flex; }
 .panel-title { text-align: center; color: var(--text); font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 1.5px; text-transform: uppercase; width: 100%; flex-shrink: 0; }
 .weather-section > .panel-title, .currency-section > .panel-title, .radio-section > .panel-title, .pomodoro-section > .panel-title { border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 
-/* position: relative — точка отсчёта для кнопки обновления (.weather-refresh) */
-.weather-section { grid-column: span 2; min-width: auto; position: relative; }
+/* position: relative — точка отсчёта для кнопки обновления (.weather-refresh).
+   z-index: 10 — блок погоды выше блоков валют и радио, чтобы выпадающие
+   списки городов не залезали под соседние виджеты */
+.weather-section { grid-column: span 2; min-width: auto; position: relative; z-index: 10; }
 .weather-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; flex: 1; align-content: center; }
-.weather-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: var(--weather-bg); border-radius: 8px; min-width: 0; }
+/* position: relative + z-index — создаём контекст стекирования внутри слота,
+   чтобы выпадающие списки городов (.weather-city-options) были выше
+   соседних блоков (курсы валют, радио) */
+.weather-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: var(--weather-bg); border-radius: 8px; min-width: 0; position: relative; z-index: 100; }
 .weather-item > * + * { margin-top: 8px; }
 .weather-city { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-align: center; }
 .weather-time { font-family: 'Inter', 'SF Mono', 'Consolas', monospace; font-size: 2.0rem; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
