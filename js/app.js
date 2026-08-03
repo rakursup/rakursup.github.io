@@ -21,7 +21,7 @@ const MAX_URL_LENGTH = 300;        // сама ссылка (URL)
 
 // Стартовые закладки «из коробки» (показываются при первом запуске)
 const DEFAULT_BOOKMARKS = [
-    { title: '📧 Почта', links: [{ name: 'Яндекс Почта', url: 'https://mail.yandex.ru/' }, { name: 'Gmail', url: 'https://gmail.com/' }, { name: 'Mail.ru', url: 'https://e.mail.ru/' }, { name: 'Рамблер', url: 'https://mail.rambler.ru/' }] },
+    { title: '📧 Почта', links: [{ name: 'Яндекс Почта', url: 'https://mail.yandex.ru/' }, { name: 'Gmail', url: 'https://gmail.com/' }, { name: 'Mail.ru', url: 'https://e.mail.ru/' }, { name: 'Рамблер/почта', url: 'https://mail.rambler.ru/' }, { name: 'Outlook', url: 'https://outlook.live.com/' }] },
     { title: '📚 Читальный зал', links: [{ name: 'Author.Today', url: 'https://author.today/' }, { name: 'Литрес', url: 'https://www.litres.ru/' }, { name: 'Литнет', url: 'https://litnet.com/' }, { name: 'Книга в ухе', url: 'https://knigavuhe.org/' }, { name: 'Самиздат', url: 'http://samlib.ru/' }] },
     { title: '📺 Видео & Стримы', links: [{ name: 'YouTube', url: 'https://youtube.com/' }, { name: 'Twitch', url: 'https://twitch.tv/' }, { name: 'Rutube', url: 'https://rutube.ru/' }, { name: 'VK Видео', url: 'https://vkvideo.ru/' }, { name: 'Kick', url: 'https://kick.com/' }] },
     { title: '🎬 Кино & Сериалы', links: [{ name: 'Кинопоиск', url: 'https://hd.kinopoisk.ru/' }, { name: 'IVI', url: 'https://www.ivi.ru/' }, { name: 'Okko', url: 'https://okko.tv/' }, { name: 'Premier', url: 'https://premier.one/' }, { name: 'Wink', url: 'https://wink.ru/' }] },
