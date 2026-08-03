@@ -555,11 +555,23 @@ document.getElementById('import-file').addEventListener('change', function(e) {
 });
 
 // ===== СБРОС К НАСТРОЙКАМ ПО УМОЛЧАНИЮ =====
-// Очищает localStorage и перезагружает страницу — сайт возвращается к состоянию
-// «из коробки» (стандартные закладки, тема, обои, поисковик и т.д.)
+// Сбрасывает настройки ТОЛЬКО текущей копии: удаляются её ключи (с её
+// префиксом), данные соседних папок остаются нетронутыми.
+// Раньше здесь был localStorage.clear() — он стирал ВСЕ локальные копии
+// сразу, что при раздельном хранении недопустимо
 document.getElementById('btn-reset').addEventListener('click', () => {
-    if (confirm('Сбросить дашборд к состоянию по умолчанию?\n\nБудут удалены: все измененные закладки и категории, будут стерты заметки, удалены обои. \n\nНе забудьте сохранить ваши закладки через Экспорт и сохранить ваши быстрые заметки, если это необходимо!\n\nЭто действие необратимо.')) {
-        localStorage.clear();
+    if (confirm('Сбросить эту копию дашборда к настройкам по умолчанию?\n\nБудут удалены: изменённые закладки и категории, заметки, обои.\nДругие папки (копии) не пострадают.\n\nНе забудьте сохранить нужное через Экспорт — действие необратимо.')) {
+        // Базовые имена всех ключей дашборда (включая кэши погоды и валют).
+        // storageKey добавит префикс текущего экземпляра, поэтому удалятся
+        // данные только этой копии, а соседние папки не пострадают
+        const dashboardKeyNames = [
+            'dashboard_bookmarks', 'dashboard_radio', 'theme', 'accent_color',
+            'bg_image', 'preferred_engine', 'dashboard_notes', 'dashboard_pomodoro',
+            'eco_mode', 'calendar_notes',
+            'weather_cache', 'weather_cache_time', 'weather_cities',
+            'dashboard_currency_cache'
+        ];
+        dashboardKeyNames.forEach(name => localStorage.removeItem(storageKey(name)));
         location.reload();
     }
 });
