@@ -298,7 +298,7 @@ body.editing .card-drag-handle { display: flex; }
     width: 170px; max-height: 240px; overflow-y: auto;
     background: var(--card-hover); border: 1px solid var(--border);
     border-radius: 10px; box-shadow: var(--shadow-lg);
-    list-style: none; padding: 5px 0; margin: 0; z-index: 500;
+    list-style: none; padding: 5px 0; margin: 0; z-index: 1000;
     opacity: 0; visibility: hidden;
     transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
 }
