@@ -494,9 +494,24 @@ function sanitizeCalendarNotes(notes) {
     return clean;
 }
 
+// Имя папки с дашбордом (для file://) — для понятного имени файла резервной
+// копии. Для http(s) возвращает пустую строку
+function getInstanceFolderName() {
+    if (location.protocol !== 'file:') return '';
+    var path = location.href;
+    try { path = decodeURIComponent(path); } catch (e) {}
+    path = path.split(/[?#]/)[0].replace(/\/[^\/]*$/, ''); // убрать файл, оставить папку
+    var parts = path.split('/');
+    var folder = parts[parts.length - 1] || '';
+    // Вырезаем символы, недопустимые в именах файлов
+    return folder.replace(/[\\/:*?"<>|]/g, '').trim();
+}
+
 // Скачивает резервную копию (закладки + заметки календаря) в JSON-файл.
 // Формат: { bookmarks: [...], calendarNotes: {...} }. Импорт понимает и
 // старый формат (просто массив закладок) — см. обработчик импорта.
+// В имя файла добавляется имя папки и идентификатор копии, чтобы бэкапы из
+// разных папок не перезаписывали друг друга, если лежат в одном месте.
 // Через data-URI вместо Blob + URL.createObjectURL — так скачивание работает
 // и в старых браузерах (на планшете Blob-вариант не срабатывал)
 document.getElementById('btn-export').addEventListener('click', () => {
@@ -507,7 +522,18 @@ document.getElementById('btn-export').addEventListener('click', () => {
     const json = JSON.stringify(backup, null, 2);
     const a = document.createElement('a');
     a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
-    a.download = `dashboard-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    // Суффикс имени файла: имя папки + идентификатор копии. Хэш обязателен —
+    // он различает даже одноимённые папки в разных местах. Для GitHub
+    // (префикс пустой) суффикс не добавляется — там копия одна
+    const instanceId = INSTANCE_PREFIX.replace(/_$/, '');
+    const folderName = getInstanceFolderName();
+    let idSuffix = '';
+    if (folderName && instanceId) {
+        idSuffix = `-${folderName}-${instanceId}`;
+    } else if (instanceId) {
+        idSuffix = `-${instanceId}`;
+    }
+    a.download = `dashboard-backup-${new Date().toISOString().slice(0, 10)}${idSuffix}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
