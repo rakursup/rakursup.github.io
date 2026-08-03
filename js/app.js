@@ -22,7 +22,7 @@ const MAX_URL_LENGTH = 300;        // сама ссылка (URL)
 // Стартовые закладки «из коробки» (показываются при первом запуске)
 const DEFAULT_BOOKMARKS = [
     { title: '📧 Почта', links: [{ name: 'Яндекс Почта', url: 'https://mail.yandex.ru/' }, { name: 'Gmail', url: 'https://gmail.com/' }, { name: 'Mail.ru', url: 'https://e.mail.ru/' }, { name: 'Рамблер', url: 'https://mail.rambler.ru/' }] },
-    { title: '💬 Соцсети & IT', links: [{ name: 'Habr', url: 'https://habr.ru/' }, { name: 'Вконтакте', url: 'https://vk.com/' }, { name: 'Twitter / X', url: 'https://twitter.com/' }, { name: 'LiveJournal', url: 'https://livejournal.com/' }] },
+    { title: '📚 Читальный зал', links: [{ name: 'Author.Today', url: 'https://author.today/' }, { name: 'Литрес', url: 'https://www.litres.ru/' }, { name: 'Литнет', url: 'https://litnet.com/' }, { name: 'Книга в ухе', url: 'https://knigavuhe.org/' }, { name: 'Самиздат', url: 'http://samlib.ru/' }] },
     { title: '📺 Видео & Стримы', links: [{ name: 'YouTube', url: 'https://youtube.com/' }, { name: 'Twitch', url: 'https://twitch.tv/' }, { name: 'Rutube', url: 'https://rutube.ru/' }, { name: 'VK Видео', url: 'https://vkvideo.ru/' }, { name: 'Kick', url: 'https://kick.com/' }] },
     { title: '🎬 Кино & Сериалы', links: [{ name: 'Кинопоиск', url: 'https://hd.kinopoisk.ru/' }, { name: 'IVI', url: 'https://www.ivi.ru/' }, { name: 'Okko', url: 'https://okko.tv/' }, { name: 'Premier', url: 'https://premier.one/' }, { name: 'Wink', url: 'https://wink.ru/' }] },
     { title: '🛒 Товары & Маркеты', links: [{ name: 'Яндекс Маркет', url: 'https://market.yandex.ru/' }, { name: 'Wildberries', url: 'https://www.wildberries.ru/' }, { name: 'Ozon', url: 'https://www.ozon.ru/' }, { name: 'Авито', url: 'https://www.avito.ru/' }] },
