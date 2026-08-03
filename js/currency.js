@@ -8,8 +8,7 @@ const CURRENCY_UPDATE_NORMAL = 6 * 60 * 60 * 1000;   // 6 часов
 const CURRENCY_UPDATE_ECO = 24 * 60 * 60 * 1000;     // 24 часа
 
 const CURRENCY_FETCH_TIMEOUT = 10000;            // Таймаут запроса, 10 секунд
-// Кэш на случай офлайна (с префиксом экземпляра — у каждой папки свой)
-const CURRENCY_CACHE_KEY = storageKey('dashboard_currency_cache');
+const CURRENCY_CACHE_KEY = storageKey('dashboard_currency_cache'); // Кэш на случай офлайна (с префиксом экземпляра)
 
 // Какие валюты показывать
 const CURRENCY_PAIRS = [
@@ -32,7 +31,8 @@ function formatNextUpdate(unixSec) {
 }
 
 // Отрисовывает список курсов (rates — объект из API или из кэша).
-// Внизу блока выводится время следующего обновления (#currency-date)
+// Внизу блока выводится время следующего обновления (#currency-date) —
+// по нему понятно и когда курсы были получены (за сутки до этого)
 function renderCurrencies(rates, nextUnix) {
   const container = document.getElementById('currency-list');
   const dateEl = document.getElementById('currency-date');
