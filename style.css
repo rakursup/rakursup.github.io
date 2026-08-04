@@ -478,7 +478,7 @@ footer { text-align: center; margin-top: 40px; padding-bottom: 20px; color: var(
 footer > * + * { margin-top: 12px; }
 .footer-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; }
 .footer-actions > * + * { margin-left: 8px; }
-.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; line-height: 1.6; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; }
+.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 2px 12px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; line-height: 1.6; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; white-space: nowrap; }
 .footer-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; margin-right: 6px; }
 .footer-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
 /* Кнопка «Сброс» — деструктивное действие: hover в цвете danger, а не accent.
@@ -620,8 +620,8 @@ body.eco-active *:active {
     .pomodoro-time { font-size: 2.2rem; }
     #notes-input { height: 180px; }
 
-    /* Кнопки футера покрупнее — удобнее попадать пальцем */
-    .footer-btn { padding: 8px 12px; }
+    /* Кнопки футера компактные: высота не должна расти на узких экранах */
+    .footer-btn { padding: 4px 12px; line-height: 1.3; }
 }
 
 /* ── МАЛЕНЬКИЕ ТЕЛЕФОНЫ (≤380px): максимальная компактность ── */
