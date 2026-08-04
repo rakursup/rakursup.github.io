@@ -7,7 +7,6 @@
 // (mode, timeLeft), этот — настройки пользователя (25/5/15/4)
 const POMO_SETTINGS_KEY = storageKey('pomodoro_settings');
 
-// Значения по умолчанию
 const DEFAULT_POMO_SETTINGS = {
     workMin: 25,
     shortBreakMin: 5,
@@ -34,17 +33,14 @@ function loadPomoSettings() {
     return { ...DEFAULT_POMO_SETTINGS };
 }
 
-// Сохраняет настройки в localStorage
 function savePomoSettings(settings) {
     safeSetItem(POMO_SETTINGS_KEY, JSON.stringify(settings));
 }
 
-// Текущие настройки
 let pomoSettings = loadPomoSettings();
 
-const POMO_SAVE_INTERVAL = 15000; // Пишем в localStorage не чаще раза в 15 секунд
+const POMO_SAVE_INTERVAL = 15000;
 
-// DOM-элементы
 const pomoModeEl = document.getElementById('pomo-mode');
 const pomoTimeEl = document.getElementById('pomo-time');
 const pomoBarEl = document.getElementById('pomo-bar');
@@ -57,7 +53,6 @@ const pomoDots = [
     document.getElementById('dot-4')
 ];
 
-// Текущее состояние таймера
 let pomoState = {
     mode: 'work',
     timeLeft: pomoSettings.workMin * 60,
@@ -85,7 +80,6 @@ function loadPomoState() {
     } catch (e) {}
 }
 
-// Сохраняет состояние (с троттлингом, если не force)
 function savePomoState(force = false) {
     const now = Date.now();
     if (!force && now - lastSavedAt < POMO_SAVE_INTERVAL) return;
@@ -106,7 +100,6 @@ function formatPomoTime(seconds) {
     return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 }
 
-// Обновляет все элементы таймера на экране
 function updatePomoDisplay() {
     pomoTimeEl.textContent = formatPomoTime(pomoState.timeLeft);
     const progress = pomoState.totalTime > 0 ? (pomoState.timeLeft / pomoState.totalTime) * 100 : 0;
@@ -126,7 +119,6 @@ function updatePomoDisplay() {
     pomoStartBtn.textContent = pomoState.running ? '⏸ Пауза' : '▶ Старт';
     pomoStartBtn.classList.toggle('running', pomoState.running);
 
-    // Показываем только нужное количество точек (sessionsBeforeLong может быть < 4)
     const visibleDots = Math.min(pomoSettings.sessionsBeforeLong, pomoDots.length);
     pomoDots.forEach((dot, i) => {
         dot.classList.remove('completed', 'active');
@@ -160,7 +152,6 @@ function playPomoBeep() {
     } catch (e) {}
 }
 
-// Переключает режим после завершения фазы
 function switchPomoMode() {
     if (pomoState.mode === 'work') {
         pomoState.completedSessions++;
@@ -196,7 +187,6 @@ function pomoTick() {
     updatePomoDisplay();
 }
 
-// Старт/пауза таймера
 function togglePomo() {
     if (pomoState.running) {
         clearInterval(pomoInterval);
@@ -212,7 +202,6 @@ function togglePomo() {
     updatePomoDisplay();
 }
 
-// Сброс таймера в исходное состояние
 function resetPomo() {
     clearInterval(pomoInterval);
     pomoInterval = null;
@@ -227,38 +216,30 @@ function resetPomo() {
 pomoStartBtn.addEventListener('click', togglePomo);
 pomoResetBtn.addEventListener('click', resetPomo);
 
-// Сохраняем остаток при скрытии или закрытии вкладки
 document.addEventListener('visibilitychange', () => { if (document.hidden) savePomoState(true); });
 window.addEventListener('beforeunload', () => savePomoState(true));
 
-// ===== РЕДАКТОР НАСТРОЕК ПОМОДОРО =====
 const pomoEditToggle = document.getElementById('pomo-edit-toggle');
 const pomoModalOverlay = document.getElementById('pomo-modal-overlay');
 const pomoModalCancel = document.getElementById('pomo-modal-cancel');
 const pomoModalSave = document.getElementById('pomo-modal-save');
 
-// Открывает модальное окно
 function openPomoEditor() {
-    // Заполняем поля текущими значениями
     document.getElementById('pomo-work-min').value = pomoSettings.workMin;
     document.getElementById('pomo-short-break-min').value = pomoSettings.shortBreakMin;
     document.getElementById('pomo-long-break-min').value = pomoSettings.longBreakMin;
     document.getElementById('pomo-sessions-before-long').value = pomoSettings.sessionsBeforeLong;
     
-    // Снимаем класс invalid
     document.querySelectorAll('.pomo-setting-row input').forEach(input => input.classList.remove('invalid'));
     
     pomoModalOverlay.classList.add('active');
-    // Фокус на первое поле
     setTimeout(() => document.getElementById('pomo-work-min').focus(), 100);
 }
 
-// Закрывает модальное окно
 function closePomoEditor() {
     pomoModalOverlay.classList.remove('active');
 }
 
-// Сохраняет настройки из модального окна с строгой валидацией
 function savePomoSettingsFromEditor() {
     const limits = {
         'pomo-work-min': { min: 1, max: 120, default: 25 },
@@ -275,11 +256,9 @@ function savePomoSettingsFromEditor() {
         const limit = limits[id];
         input.classList.remove('invalid');
         
-        // Получаем значение как число
         const raw = input.value.trim();
         const parsed = parseInt(raw, 10);
         
-        // Валидация: пустое, NaN, вне диапазона (дробные и отрицательные отсеиваются)
         if (raw === '' || isNaN(parsed) || parsed < limit.min || parsed > limit.max) {
             input.classList.add('invalid');
             hasError = true;
@@ -290,7 +269,6 @@ function savePomoSettingsFromEditor() {
     
     if (hasError) return;
     
-    // Сохраняем настройки
     pomoSettings = {
         workMin: values['pomo-work-min'],
         shortBreakMin: values['pomo-short-break-min'],
@@ -299,7 +277,6 @@ function savePomoSettingsFromEditor() {
     };
     savePomoSettings(pomoSettings);
     
-    // Если таймер не запущен — сбрасываем к новым значениям
     if (!pomoState.running) {
         pomoState.mode = 'work';
         pomoState.timeLeft = pomoState.totalTime = pomoSettings.workMin * 60;
@@ -311,12 +288,28 @@ function savePomoSettingsFromEditor() {
     updatePomoDisplay();
 }
 
-// Обработчики модального окна
 pomoEditToggle.addEventListener('click', openPomoEditor);
 pomoModalCancel.addEventListener('click', closePomoEditor);
 pomoModalSave.addEventListener('click', savePomoSettingsFromEditor);
 pomoModalOverlay.addEventListener('click', (e) => { if (e.target === pomoModalOverlay) closePomoEditor(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pomoModalOverlay.classList.contains('active')) closePomoEditor(); });
+
+// Ограничение длины ввода в числовые поля редактора помодоро.
+// HTML-атрибут maxlength не работает с type="number" (спецификация HTML),
+// поэтому обрезаем значение через JS при каждом вводе.
+// Допустимая длина = количество цифр в атрибуте max (3 для 120, 2 для 60/10).
+// Работает везде: десктоп, мобильные, вставка из буфера, автозаполнение.
+// Дополнительно валидация в savePomoSettingsFromEditor() отклонит
+// значения вне диапазона min/max.
+document.querySelectorAll('.pomo-setting-row input[type="number"]').forEach(input => {
+    input.addEventListener('input', function() {
+        const max = parseInt(this.max, 10);
+        if (!max) return;
+        const maxDigits = String(max).length;
+        // Разрешаем только цифры, удаляем остальное (для вставки текста)
+        this.value = this.value.replace(/[^\d]/g, '').slice(0, maxDigits);
+    });
+});
 
 loadPomoState();
 updatePomoDisplay();
