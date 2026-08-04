@@ -33,7 +33,10 @@ function loadPomoSettings() {
     return { ...DEFAULT_POMO_SETTINGS };
 }
 
+// Сохраняет настройки пользователя.
+// Во время сброса запись блокируется флагом __dashboardResetInProgress.
 function savePomoSettings(settings) {
+    if (window.__dashboardResetInProgress) return;
     safeSetItem(POMO_SETTINGS_KEY, JSON.stringify(settings));
 }
 
@@ -65,8 +68,6 @@ let pomoInterval = null;
 let lastSavedAt = 0;
 
 // Загружает состояние из localStorage.
-// Проверка != null вместо ?? (nullish coalescing) — ?? не понимают
-// браузеры до Chrome 80, != null полностью равноценен для null/undefined
 function loadPomoState() {
     try {
         const saved = JSON.parse(localStorage.getItem(POMO_KEY));
@@ -80,10 +81,15 @@ function loadPomoState() {
     } catch (e) {}
 }
 
+// Сохраняет состояние таймера.
+// Во время сброса запись блокируется флагом __dashboardResetInProgress.
 function savePomoState(force = false) {
+    if (window.__dashboardResetInProgress) return;
+
     const now = Date.now();
     if (!force && now - lastSavedAt < POMO_SAVE_INTERVAL) return;
     lastSavedAt = now;
+
     safeSetItem(POMO_KEY, JSON.stringify({
         mode: pomoState.mode,
         timeLeft: pomoState.timeLeft,
@@ -216,8 +222,19 @@ function resetPomo() {
 pomoStartBtn.addEventListener('click', togglePomo);
 pomoResetBtn.addEventListener('click', resetPomo);
 
-document.addEventListener('visibilitychange', () => { if (document.hidden) savePomoState(true); });
-window.addEventListener('beforeunload', () => savePomoState(true));
+// Сохраняем остаток при скрытии или закрытии вкладки,
+// но не делаем этого во время глобального сброса.
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !window.__dashboardResetInProgress) savePomoState(true);
+});
+
+window.addEventListener('beforeunload', () => {
+    if (!window.__dashboardResetInProgress) savePomoState(true);
+});
+
+// Инициализация
+loadPomoState();
+updatePomoDisplay();
 
 const pomoEditToggle = document.getElementById('pomo-edit-toggle');
 const pomoModalOverlay = document.getElementById('pomo-modal-overlay');
@@ -229,9 +246,9 @@ function openPomoEditor() {
     document.getElementById('pomo-short-break-min').value = pomoSettings.shortBreakMin;
     document.getElementById('pomo-long-break-min').value = pomoSettings.longBreakMin;
     document.getElementById('pomo-sessions-before-long').value = pomoSettings.sessionsBeforeLong;
-    
+
     document.querySelectorAll('.pomo-setting-row input').forEach(input => input.classList.remove('invalid'));
-    
+
     pomoModalOverlay.classList.add('active');
     setTimeout(() => document.getElementById('pomo-work-min').focus(), 100);
 }
@@ -247,18 +264,18 @@ function savePomoSettingsFromEditor() {
         'pomo-long-break-min': { min: 1, max: 120, default: 15 },
         'pomo-sessions-before-long': { min: 1, max: 10, default: 4 }
     };
-    
+
     let hasError = false;
     const values = {};
-    
+
     Object.keys(limits).forEach(id => {
         const input = document.getElementById(id);
         const limit = limits[id];
         input.classList.remove('invalid');
-        
+
         const raw = input.value.trim();
         const parsed = parseInt(raw, 10);
-        
+
         if (raw === '' || isNaN(parsed) || parsed < limit.min || parsed > limit.max) {
             input.classList.add('invalid');
             hasError = true;
@@ -266,9 +283,9 @@ function savePomoSettingsFromEditor() {
             values[id] = parsed;
         }
     });
-    
+
     if (hasError) return;
-    
+
     pomoSettings = {
         workMin: values['pomo-work-min'],
         shortBreakMin: values['pomo-short-break-min'],
@@ -276,14 +293,14 @@ function savePomoSettingsFromEditor() {
         sessionsBeforeLong: values['pomo-sessions-before-long']
     };
     savePomoSettings(pomoSettings);
-    
+
     if (!pomoState.running) {
         pomoState.mode = 'work';
         pomoState.timeLeft = pomoState.totalTime = pomoSettings.workMin * 60;
         pomoState.completedSessions = 0;
         savePomoState(true);
     }
-    
+
     closePomoEditor();
     updatePomoDisplay();
 }
@@ -307,9 +324,6 @@ document.querySelectorAll('.pomo-setting-row input[type="number"]').forEach(inpu
         if (!max) return;
         const maxDigits = String(max).length;
         // Разрешаем только цифры, удаляем остальное (для вставки текста)
-        this.value = this.value.replace(/[^\d]/g, '').slice(0, maxDigits);
+        this.value = this.value.replace(/\D/g, '').slice(0, maxDigits);
     });
 });
-
-loadPomoState();
-updatePomoDisplay();

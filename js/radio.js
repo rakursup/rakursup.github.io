@@ -22,8 +22,10 @@ function loadRadioStations() {
     return [];
 }
 
-// Сохраняет станции в localStorage
+// Сохраняет станции в localStorage.
+// Во время сброса запись блокируется флагом __dashboardResetInProgress.
 function saveRadioStations(stations) {
+    if (window.__dashboardResetInProgress) return;
     safeSetItem(RADIO_STATIONS_KEY, JSON.stringify(stations));
 }
 
@@ -70,7 +72,7 @@ function loadRadioState() {
             audioEl.volume = (saved.volume != null ? saved.volume : 50) / 100;
         }
     } catch (e) {}
-    
+
     // Если станций нет — показываем подсказку
     if (RADIO_STATIONS.length === 0) {
         stationName.textContent = 'Добавьте радиостанцию';
@@ -85,8 +87,10 @@ function loadRadioState() {
     }
 }
 
-// Сохраняет состояние с задержкой
+// Сохраняет состояние с задержкой.
+// Во время сброса запись блокируется флагом __dashboardResetInProgress.
 const debouncedSaveRadio = debounce(() => {
+    if (window.__dashboardResetInProgress) return;
     safeSetItem(RADIO_STORAGE_KEY, JSON.stringify({ station: currentStation, volume: parseInt(volumeSlider.value) }));
 }, 300);
 function saveRadioState() { debouncedSaveRadio(); }
@@ -217,16 +221,16 @@ function renderRadioEditor() {
         row.className = 'radio-station-row';
         row.innerHTML = `
             <span class="station-number">${i + 1}</span>
-            <input type="text" class="station-name-input" 
-                   placeholder="Название" 
-                   value="${escapeHtml(station.name)}" 
+            <input type="text" class="station-name-input"
+                   placeholder="Название"
+                   value="${escapeHtml(station.name)}"
                    maxlength="${MAX_STATION_NAME_LENGTH}"
-                   title="Максимум ${MAX_STATION_NAME_LENGTH} символов">
-            <input type="text" class="station-url-input" 
-                   placeholder="URL потока" 
-                   value="${escapeHtml(station.url)}" 
+                   title="До ${MAX_STATION_NAME_LENGTH} символов">
+            <input type="text" class="station-url-input"
+                   placeholder="URL потока"
+                   value="${escapeHtml(station.url)}"
                    maxlength="${MAX_STATION_URL_LENGTH}"
-                   title="Максимум ${MAX_STATION_URL_LENGTH} символов">
+                   title="До ${MAX_STATION_URL_LENGTH} символов">
         `;
         radioStationsEditor.appendChild(row);
     }
@@ -295,15 +299,15 @@ function saveStationsFromEditor() {
     // Сохраняем и обновляем
     RADIO_STATIONS = newStations;
     saveRadioStations(newStations);
-    
+
     // Если текущая станция выходит за пределы — сбрасываем на 0
     if (currentStation >= newStations.length) {
         currentStation = 0;
     }
-    
+
     closeRadioEditor();
     loadRadioState(); // Обновляем UI
-    
+
     // Если играем — перезапускаем с новой станцией
     if (isPlaying && newStations.length > 0) {
         playCurrentStation();

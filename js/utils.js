@@ -38,13 +38,44 @@ function storageKey(name) {
 // Ключи для сохранения данных в браузере (localStorage)
 // localStorage — это "память" браузера, данные не пропадают после закрытия
 const STORAGE_KEY = storageKey('dashboard_bookmarks');      // Закладки
-const RADIO_STORAGE_KEY = storageKey('dashboard_radio');    // Радио: текущая станция + громкость
+const RADIO_STORAGE_KEY = storageKey('dashboard_radio');    // Настройки радио
 const THEME_KEY = storageKey('theme');                      // Тема (светлая/тёмная)
 const ACCENT_KEY = storageKey('accent_color');              // Акцентный цвет
 const BG_KEY = storageKey('bg_image');                      // Фоновое изображение
 const ENGINE_KEY = storageKey('preferred_engine');          // Поисковик
 const NOTES_KEY = storageKey('dashboard_notes');            // Заметки
-const POMO_KEY = storageKey('dashboard_pomodoro');          // Помодоро: состояние таймера
+const POMO_KEY = storageKey('dashboard_pomodoro');          // Помодоро-таймер
+
+// Ключи, которые не должны удаляться кнопкой «Сброс».
+// radio_stations пользователь добавляет вручную, поэтому обычный сброс его не трогает.
+// При копировании/перемещении/переименовании папки данные всё равно не переносятся,
+// так как меняется INSTANCE_PREFIX.
+const RESET_PRESERVED_KEYS = ['radio_stations'];
+
+// Удаляет localStorage только текущей копии.
+// Если prefix пустой (http/https), удаляет все ключи origin.
+// Если prefix есть (file://), удаляет только ключи с этим prefix.
+function clearInstanceStorage(excludeBaseNames) {
+    if (excludeBaseNames === undefined) {
+        excludeBaseNames = RESET_PRESERVED_KEYS;
+    }
+
+    const exclude = {};
+
+    (excludeBaseNames || []).forEach(name => {
+        exclude[storageKey(name)] = true;
+    });
+
+    const prefix = INSTANCE_PREFIX;
+
+    Object.keys(localStorage).forEach(key => {
+        if (exclude[key]) return;
+
+        if (!prefix || key.indexOf(prefix) === 0) {
+            localStorage.removeItem(key);
+        }
+    });
+}
 
 // Безопасное сохранение в localStorage
 // Если хранилище переполнено — пытается очистить старые данные
@@ -76,8 +107,7 @@ function safeSetItem(key, value) {
     }
 }
 
-// Вычисляет размер строки в байтах. Используется для проверки размера обоев
-// перед сохранением в localStorage (лимит MAX_BG_SIZE_BYTES в app.js)
+// Вычисляет размер строки в байтах (нужно для проверки размера картинок)
 function estimateSize(str) {
     return new Blob([str]).size;
 }
@@ -103,7 +133,7 @@ function escapeHtml(text) {
 // Проверяет, что URL безопасный (разрешены только http, https, mailto).
 // Блокирует опасные схемы javascript: и data: (например, javascript:alert(1)).
 // Если протокол не указан (ya.ru, www.site.com), добавляет https:// — иначе
-// браузер сочтёт ссылку относительной и откроет 404 на текущем домене
+// браузер сочтёт ссылку относительной и будет вести на 404 на текущем домене
 function sanitizeUrl(url) {
     if (!url) return '#';
     let trimmed = url.trim();
