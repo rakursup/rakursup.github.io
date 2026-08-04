@@ -633,3 +633,80 @@ body.eco-active *:active {
     .weather-city-name { font-size: 0.75rem; }
     .pomodoro-time { font-size: 1.9rem; }
 }
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 📻 РЕДАКТОР РАДИОСТАНЦИЙ                                    */
+/* ═══════════════════════════════════════════════════════════ */
+.radio-section { position: relative; }
+
+/* Карандаш — правый верхний угол блока радио */
+.radio-edit-toggle {
+    position: absolute; top: 16px; right: 20px;
+    width: 30px; height: 30px; border-radius: 8px;
+    background: transparent; border: 1px solid transparent;
+    color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+    z-index: 10;
+}
+.radio-edit-toggle:hover { color: var(--accent); border-color: var(--border); }
+.radio-edit-toggle svg { width: 16px; height: 16px; fill: currentColor; }
+
+/* Модальное окно редактора радиостанций */
+.radio-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000;
+}
+.radio-modal-overlay.active { display: flex; }
+.radio-modal-overlay .modal { max-width: 500px; width: 90%; }
+
+/* Контейнер с 7 парами полей */
+.radio-stations-editor {
+    display: flex; flex-direction: column;
+    gap: 10px; margin-bottom: 16px;
+    max-height: 400px; overflow-y: auto;
+}
+
+/* Одна пара полей: номер + название + URL */
+.radio-station-row {
+    display: grid;
+    grid-template-columns: 24px 1fr 1fr;
+    gap: 8px; align-items: center;
+}
+
+.radio-station-row .station-number {
+    font-size: 0.8rem; color: var(--text-muted);
+    text-align: center; font-weight: 600;
+}
+
+.radio-station-row input {
+    width: 100%; padding: 6px 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-size: 0.85rem; outline: none;
+    transition: border-color 0.2s;
+}
+
+.radio-station-row input:focus { border-color: var(--accent); }
+.radio-station-row input.invalid {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.15);
+}
+
+/* Адаптивность для мобильных: поля в колонку */
+@media (max-width: 600px) {
+    .radio-station-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    .radio-station-row .station-number {
+        text-align: left; font-size: 0.75rem;
+    }
+    
+    /* Карандаш радио компактнее на мобильных */
+    .radio-edit-toggle { top: 12px; right: 12px; width: 26px; height: 26px; }
+    .radio-edit-toggle svg { width: 14px; height: 14px; }
+}

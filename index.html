@@ -195,6 +195,10 @@
         <!-- ──────── 📻️ НАЧАЛО: РАДИО → js/radio.js ──────── -->
         <div class="panel-block radio-section">
             <div class="panel-title">📻️ Онлайн-радио</div>
+            <!-- Карандаш — режим редактирования радиостанций (правый верхний угол) -->
+            <button class="radio-edit-toggle" id="radio-edit-toggle" title="Редактировать станции" aria-label="Редактировать станции">
+                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            </button>
             <div class="radio-player">
                 <div class="radio-equalizer" id="radio-eq">Сейчас играет<span></span><span></span><span></span><span></span><span></span></div>
                 <div class="radio-station-name" id="radio-name">—</div>
@@ -352,6 +356,24 @@
         </div>
     </div>
     <!-- ═══════════════════════ КОНЕЦ: МОДАЛЬНОГО ОКНА ═════════════════ -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 📻 НАЧАЛО: МОДАЛЬНОЕ ОКНО РЕДАКТОРА РАДИОСТАНЦИЙ → js/radio.js -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="radio-modal-overlay" id="radio-modal-overlay">
+        <div class="modal">
+            <h3 id="radio-modal-title">Редактировать станции</h3>
+            <div class="radio-stations-editor" id="radio-stations-editor">
+                <!-- 7 пар полей генерируются JS -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="radio-modal-cancel">Отмена</button>
+                <button class="modal-btn primary" id="radio-modal-save">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═══════════════════════ КОНЕЦ: МОДАЛЬНОГО ОКНА РАДИО ══════════ -->
 
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
