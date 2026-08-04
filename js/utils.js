@@ -38,13 +38,13 @@ function storageKey(name) {
 // Ключи для сохранения данных в браузере (localStorage)
 // localStorage — это "память" браузера, данные не пропадают после закрытия
 const STORAGE_KEY = storageKey('dashboard_bookmarks');      // Закладки
-const RADIO_STORAGE_KEY = storageKey('dashboard_radio');    // Настройки радио
+const RADIO_STORAGE_KEY = storageKey('dashboard_radio');    // Радио: текущая станция + громкость
 const THEME_KEY = storageKey('theme');                      // Тема (светлая/тёмная)
 const ACCENT_KEY = storageKey('accent_color');              // Акцентный цвет
 const BG_KEY = storageKey('bg_image');                      // Фоновое изображение
 const ENGINE_KEY = storageKey('preferred_engine');          // Поисковик
 const NOTES_KEY = storageKey('dashboard_notes');            // Заметки
-const POMO_KEY = storageKey('dashboard_pomodoro');          // Помодоро-таймер
+const POMO_KEY = storageKey('dashboard_pomodoro');          // Помодоро: состояние таймера
 
 // Безопасное сохранение в localStorage
 // Если хранилище переполнено — пытается очистить старые данные
@@ -76,7 +76,8 @@ function safeSetItem(key, value) {
     }
 }
 
-// Вычисляет размер строки в байтах (нужно для проверки размера картинок)
+// Вычисляет размер строки в байтах. Используется для проверки размера обоев
+// перед сохранением в localStorage (лимит MAX_BG_SIZE_BYTES в app.js)
 function estimateSize(str) {
     return new Blob([str]).size;
 }

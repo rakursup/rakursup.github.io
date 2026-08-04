@@ -2,7 +2,9 @@
 // ПОМОДОРО ТАЙМЕР — техника продуктивности с настройками
 // Отсчёт от таймстампа: не дрейфует в фоновой вкладке
 // ============================================================
-// Ключ для хранения настроек в localStorage (с префиксом экземпляра)
+// Ключ для хранения настроек в localStorage (с префиксом экземпляра).
+// Отдельный от POMO_KEY (utils.js): POMO_KEY хранит состояние таймера
+// (mode, timeLeft), этот — настройки пользователя (25/5/15/4)
 const POMO_SETTINGS_KEY = storageKey('pomodoro_settings');
 
 // Значения по умолчанию
@@ -13,7 +15,9 @@ const DEFAULT_POMO_SETTINGS = {
     sessionsBeforeLong: 4
 };
 
-// Загружает настройки из localStorage (или значения по умолчанию)
+// Загружает настройки из localStorage (или значения по умолчанию).
+// Оператор || (вместо ??) здесь намеренный: если пользователь сохранит 0,
+// возьмётся дефолт. Для таймеров 0 не имеет смысла.
 function loadPomoSettings() {
     try {
         const saved = localStorage.getItem(POMO_SETTINGS_KEY);
@@ -65,7 +69,9 @@ let pomoState = {
 let pomoInterval = null;
 let lastSavedAt = 0;
 
-// Загружает состояние из localStorage
+// Загружает состояние из localStorage.
+// Проверка != null вместо ?? (nullish coalescing) — ?? не понимают
+// браузеры до Chrome 80, != null полностью равноценен для null/undefined
 function loadPomoState() {
     try {
         const saved = JSON.parse(localStorage.getItem(POMO_KEY));
@@ -92,7 +98,8 @@ function savePomoState(force = false) {
     }));
 }
 
-// Форматирует секунды в вид "MM:SS"
+// Форматирует секунды в вид "MM:SS". Ручной padding вместо padStart() —
+// padStart появился только в Chrome 57, ручной вариант работает везде
 function formatPomoTime(seconds) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -119,7 +126,7 @@ function updatePomoDisplay() {
     pomoStartBtn.textContent = pomoState.running ? '⏸ Пауза' : '▶ Старт';
     pomoStartBtn.classList.toggle('running', pomoState.running);
 
-    // Показываем точки в зависимости от количества сессий
+    // Показываем только нужное количество точек (sessionsBeforeLong может быть < 4)
     const visibleDots = Math.min(pomoSettings.sessionsBeforeLong, pomoDots.length);
     pomoDots.forEach((dot, i) => {
         dot.classList.remove('completed', 'active');
@@ -133,7 +140,8 @@ function updatePomoDisplay() {
         : 'Дашборд | Стартовая';
 }
 
-// Двойной звуковой сигнал через Web Audio API
+// Двойной звуковой сигнал через Web Audio API.
+// Разные частоты для работы (выше) и перерыва (ниже) — легко отличить на слух
 function playPomoBeep() {
     try {
         const actx = new (window.AudioContext || window.webkitAudioContext)();
@@ -170,7 +178,8 @@ function switchPomoMode() {
     }
 }
 
-// Тик: время считается от таймстампа
+// Тик: время считается от таймстампа (endTime - Date.now()), а не декрементом.
+// Даже если браузер «заморозил» вкладку, значение будет точным
 function pomoTick() {
     pomoState.timeLeft = Math.max(0, Math.ceil((pomoState.endTime - Date.now()) / 1000));
     if (pomoState.timeLeft <= 0) {
@@ -249,7 +258,7 @@ function closePomoEditor() {
     pomoModalOverlay.classList.remove('active');
 }
 
-// Сохраняет настройки из модального окна
+// Сохраняет настройки из модального окна с строгой валидацией
 function savePomoSettingsFromEditor() {
     const limits = {
         'pomo-work-min': { min: 1, max: 120, default: 25 },
@@ -270,7 +279,7 @@ function savePomoSettingsFromEditor() {
         const raw = input.value.trim();
         const parsed = parseInt(raw, 10);
         
-        // Валидация: пустое, NaN, вне диапазона
+        // Валидация: пустое, NaN, вне диапазона (дробные и отрицательные отсеиваются)
         if (raw === '' || isNaN(parsed) || parsed < limit.min || parsed > limit.max) {
             input.classList.add('invalid');
             hasError = true;

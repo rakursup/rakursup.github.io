@@ -342,7 +342,8 @@ body.editing .card-drag-handle { display: flex; }
 /* Время следующего обновления — внизу блока, приглушённая (вторичная информация) */
 .currency-date { text-align: center; font-size: 0.75rem; color: var(--text-muted); opacity: 0.7; margin-top: 8px; }
 
-.radio-section { grid-column: span 1; min-width: auto; }
+/* position: relative — точка отсчёта для карандаша (.radio-edit-toggle) */
+.radio-section { grid-column: span 1; min-width: auto; position: relative; }
 .radio-player { display: flex; flex-direction: column; align-items: center; flex: 1; justify-content: center; }
 .radio-player > * + * { margin-top: 12px; }
 .radio-station-name { font-size: 0.95rem; font-weight: 600; color: var(--text); text-align: center; }
@@ -447,7 +448,8 @@ body.editing .card-drag-handle { display: flex; }
 /* Текст записи в режиме просмотра (без редактирования) */
 .cal-modal-view { padding: 10px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.95rem; line-height: 1.5; word-break: break-word; margin-bottom: 16px; }
 
-.pomodoro-section { grid-column: span 1; min-width: auto; }
+/* position: relative — точка отсчёта для карандаша (.pomo-edit-toggle) */
+.pomodoro-section { grid-column: span 1; min-width: auto; position: relative; }
 .pomodoro-container { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 8px 0; }
 .pomodoro-container > * + * { margin-top: 16px; }
 .pomodoro-display { display: flex; flex-direction: column; align-items: center; }
@@ -637,7 +639,6 @@ body.eco-active *:active {
 /* ═══════════════════════════════════════════════════════════ */
 /* 📻 РЕДАКТОР РАДИОСТАНЦИЙ                                    */
 /* ═══════════════════════════════════════════════════════════ */
-.radio-section { position: relative; }
 
 /* Карандаш — правый верхний угол блока радио */
 .radio-edit-toggle {
@@ -714,7 +715,6 @@ body.eco-active *:active {
 /* ═══════════════════════════════════════════════════════════ */
 /* 🍅 РЕДАКТОР ПОМОДОРО                                       */
 /* ═══════════════════════════════════════════════════════════ */
-.pomodoro-section { position: relative; }
 
 /* Карандаш — правый верхний угол блока помодоро */
 .pomo-edit-toggle {
@@ -768,6 +768,34 @@ body.eco-active *:active {
 .pomo-setting-row input.invalid {
     border-color: var(--danger);
     box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.15);
+}
+
+/* Подсказка диапазона (например «1–120 мин») в label */
+.pomo-setting-row .hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+/* Стрелки переключателя числа: показываем всегда, а не только при hover.
+   Chrome/Safari по умолчанию скрывают их — принудительно включаем видимость */
+.pomo-setting-row input[type="number"]::-webkit-outer-spin-button,
+.pomo-setting-row input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: inner-spin-button;
+    opacity: 1;
+    height: auto;
+    margin: 0;
+}
+
+/* Firefox: нативные стрелки видны по умолчанию, но на всякий случай
+   возвращаем стандартный вид при hover/focus */
+.pomo-setting-row input[type="number"] {
+    -moz-appearance: textfield;
+}
+.pomo-setting-row input[type="number"]:hover,
+.pomo-setting-row input[type="number"]:focus {
+    -moz-appearance: number-input;
 }
 
 /* Адаптивность для мобильных */

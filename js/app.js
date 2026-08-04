@@ -28,6 +28,7 @@ const DEFAULT_BOOKMARKS = [
     { title: '🛒 Товары & Маркеты', links: [{ name: 'Яндекс Маркет', url: 'https://market.yandex.ru/' }, { name: 'Wildberries', url: 'https://www.wildberries.ru/' }, { name: 'Ozon', url: 'https://www.ozon.ru/' }, { name: 'AliExpress', url: 'https://aliexpress.ru/' }, { name: 'DNS', url: 'https://www.dns-shop.ru/' }] },
     { title: '🏛️ Услуги & Сервисы', links: [{ name: 'Госуслуги', url: 'https://gosuslugi.ru/' }, { name: 'Авиасейлс', url: 'https://www.aviasales.ru/' }, { name: 'Tutu.ru', url: 'https://www.tutu.ru/' }, { name: 'Сравни.ру', url: 'https://sravni.ru/' }, { name: 'YouDo', url: 'https://youdo.com/' }] },
     { title: '🗺️ Карты & Навигация', links: [{ name: 'Яндекс Карты', url: 'https://yandex.ru/maps/' }, { name: '2ГИС', url: 'https://2gis.ru/' }, { name: 'Google Maps', url: 'https://www.google.com/maps' }, { name: 'OpenStreetMap', url: 'https://www.openstreetmap.org/' }, { name: 'Maps.me', url: 'https://maps.me/' }] },
+    // Дзен: URL намеренно yandex.ru — dzen.ru блокируется AdBlock/uBlock как рекламный домен
     { title: '📰 Новости & Инфо', links: [{ name: 'ТАСС', url: 'https://tass.ru/' }, { name: 'Дзен', url: 'https://yandex.ru/' }, { name: 'Хабр', url: 'https://habr.com/' }, { name: '4PDA', url: 'https://4pda.to/' }, { name: 'iXBT', url: 'https://www.ixbt.com/' }] },
     { title: '🛠️ Инструменты', links: [{ name: 'Яндекс Переводчик', url: 'https://translate.yandex.ru/' }, { name: 'Google Translate', url: 'https://translate.google.com/' }, { name: 'PROMT.One', url: 'https://www.translate.ru' }, { name: 'Конвертер', url: 'https://www.online-convert.com/ru' }, { name: 'Калькулятор', url: 'https://calcus.ru/' }, { name: 'PDF24 Tools', url: 'https://tools.pdf24.org/ru/' }] },
     { title: '💻 Разработка', links: [{ name: 'GitHub', url: 'https://github.com/' }, { name: 'Stack Overflow', url: 'https://stackoverflow.com/' }, { name: 'ChatGPT', url: 'https://chat.openai.com/' }, { name: 'MDN Web Docs', url: 'https://developer.mozilla.org/' }, { name: 'Docker Hub', url: 'https://hub.docker.com/' }, { name: 'CodePen', url: 'https://codepen.io/' }] },
@@ -589,10 +590,15 @@ document.getElementById('btn-reset').addEventListener('click', () => {
     if (confirm('Сбросить эту копию дашборда к настройкам по умолчанию?\n\nБудут удалены: изменённые закладки и категории, заметки, обои.\nДругие папки (копии) не пострадают.\n\nНе забудьте сохранить нужное через Экспорт — действие необратимо.')) {
         // Базовые имена всех ключей дашборда (включая кэши погоды и валют).
         // storageKey добавит префикс текущего экземпляра, поэтому удалятся
-        // данные только этой копии, а соседние папки не пострадают
+        // данные только этой копии, а соседние папки не пострадают.
+        // ⚠️ radio_stations НАМЕРЕННО не включён: настройка радиостанций
+        // (подбор URL потоков, проверка работоспособности) — трудоёмкая,
+        // пользователь теряет её с трудом. Помодоро (pomodoro_settings) —
+        // простые числа, их не жалко сбросить к дефолтам.
         const dashboardKeyNames = [
             'dashboard_bookmarks', 'dashboard_radio', 'theme', 'accent_color',
             'bg_image', 'preferred_engine', 'dashboard_notes', 'dashboard_pomodoro',
+            'pomodoro_settings',
             'eco_mode', 'calendar_notes',
             'weather_cache', 'weather_cache_time', 'weather_cities',
             'dashboard_currency_cache'
