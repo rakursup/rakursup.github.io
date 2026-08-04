@@ -277,6 +277,10 @@
         <!-- ──────── 🍅 НАЧАЛО: ПОМОДОРО → js/pomodoro.js ──────── -->
         <div class="panel-block pomodoro-section">
             <div class="panel-title">🍅 Помодоро</div>
+            <!-- Карандаш — режим редактирования таймеров (правый верхний угол) -->
+            <button class="pomo-edit-toggle" id="pomo-edit-toggle" title="Настроить таймеры" aria-label="Настроить таймеры">
+                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            </button>
             <div class="pomodoro-container">
                 <div class="pomodoro-display">
                     <span class="pomodoro-mode" id="pomo-mode">Фокус</span>
@@ -374,6 +378,39 @@
         </div>
     </div>
     <!-- ═══════════════════════ КОНЕЦ: МОДАЛЬНОГО ОКНА РАДИО ══════════ -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 🍅 НАЧАЛО: МОДАЛЬНОЕ ОКНО РЕДАКТОРА ПОМОДОРО → js/pomodoro.js  -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="pomo-modal-overlay" id="pomo-modal-overlay">
+        <div class="modal">
+            <h3 id="pomo-modal-title">Настроить таймеры</h3>
+            <div class="pomo-settings-editor" id="pomo-settings-editor">
+                <div class="pomo-setting-row">
+                    <label for="pomo-work-min">Фокус (минут)</label>
+                    <input type="number" id="pomo-work-min" min="1" max="120" value="25">
+                </div>
+                <div class="pomo-setting-row">
+                    <label for="pomo-short-break-min">Короткий перерыв (минут)</label>
+                    <input type="number" id="pomo-short-break-min" min="1" max="60" value="5">
+                </div>
+                <div class="pomo-setting-row">
+                    <label for="pomo-long-break-min">Длинный перерыв (минут)</label>
+                    <input type="number" id="pomo-long-break-min" min="1" max="120" value="15">
+                </div>
+                <div class="pomo-setting-row">
+                    <label for="pomo-sessions-before-long">Сессий до длинного перерыва</label>
+                    <input type="number" id="pomo-sessions-before-long" min="1" max="10" value="4">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="pomo-modal-cancel">Отмена</button>
+                <button class="modal-btn primary" id="pomo-modal-save">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    <!-- ═══════════════════════ КОНЕЦ: МОДАЛЬНОГО ОКНА ПОМОДОРО ═══════ -->
 
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
