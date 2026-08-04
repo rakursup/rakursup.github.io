@@ -251,40 +251,49 @@ function closePomoEditor() {
 
 // Сохраняет настройки из модального окна
 function savePomoSettingsFromEditor() {
-    const workMin = parseInt(document.getElementById('pomo-work-min').value);
-    const shortBreakMin = parseInt(document.getElementById('pomo-short-break-min').value);
-    const longBreakMin = parseInt(document.getElementById('pomo-long-break-min').value);
-    const sessionsBeforeLong = parseInt(document.getElementById('pomo-sessions-before-long').value);
-    
-    // Валидация
-    const inputs = {
-        'pomo-work-min': workMin,
-        'pomo-short-break-min': shortBreakMin,
-        'pomo-long-break-min': longBreakMin,
-        'pomo-sessions-before-long': sessionsBeforeLong
+    const limits = {
+        'pomo-work-min': { min: 1, max: 120, default: 25 },
+        'pomo-short-break-min': { min: 1, max: 60, default: 5 },
+        'pomo-long-break-min': { min: 1, max: 120, default: 15 },
+        'pomo-sessions-before-long': { min: 1, max: 10, default: 4 }
     };
     
     let hasError = false;
-    Object.keys(inputs).forEach(id => {
+    const values = {};
+    
+    Object.keys(limits).forEach(id => {
         const input = document.getElementById(id);
+        const limit = limits[id];
         input.classList.remove('invalid');
-        const value = inputs[id];
-        if (isNaN(value) || value < 1) {
+        
+        // Получаем значение как число
+        const raw = input.value.trim();
+        const parsed = parseInt(raw, 10);
+        
+        // Валидация: пустое, NaN, вне диапазона
+        if (raw === '' || isNaN(parsed) || parsed < limit.min || parsed > limit.max) {
             input.classList.add('invalid');
             hasError = true;
+        } else {
+            values[id] = parsed;
         }
     });
     
     if (hasError) return;
     
     // Сохраняем настройки
-    pomoSettings = { workMin, shortBreakMin, longBreakMin, sessionsBeforeLong };
+    pomoSettings = {
+        workMin: values['pomo-work-min'],
+        shortBreakMin: values['pomo-short-break-min'],
+        longBreakMin: values['pomo-long-break-min'],
+        sessionsBeforeLong: values['pomo-sessions-before-long']
+    };
     savePomoSettings(pomoSettings);
     
     // Если таймер не запущен — сбрасываем к новым значениям
     if (!pomoState.running) {
         pomoState.mode = 'work';
-        pomoState.timeLeft = pomoState.totalTime = workMin * 60;
+        pomoState.timeLeft = pomoState.totalTime = pomoSettings.workMin * 60;
         pomoState.completedSessions = 0;
         savePomoState(true);
     }
