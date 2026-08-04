@@ -490,7 +490,7 @@ footer > * + * { margin-top: 12px; }
 .footer-actions > .footer-btn {
     margin: 0 4px 8px;
 }
-.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 2px 12px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; line-height: 1.6; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; white-space: nowrap; }
+.footer-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; line-height: 1.6; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; white-space: nowrap; }
 .footer-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; margin-right: 6px; }
 .footer-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
 /* Кнопка «Сброс» — деструктивное действие: hover в цвете danger, а не accent.
