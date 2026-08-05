@@ -1,0 +1,18 @@
+// ============================================================
+// ОНЛАЙН-РАДИО — аудиоплеер с 7 станциями
+// ============================================================
+// Список радиостанций для тестирования.
+// ⚠️ Relax FM — HLS (.m3u8): играет в Safari и мобильных браузерах (через
+// системный кодек), в десктопных Chrome/Firefox/Opera без hls.js пропускается
+// автопереключением. Остальные станции — прямые потоки
+// mp3/aac по HTTPS, играют в любом браузере без mixed content.
+
+    Relax FM                https://hls-01-gpm.hostingradio.ru/relaxfm495/playlist.m3u8
+    Record Chill            https://radiorecord.hostingradio.ru/chil96.aacp
+    Monte Carlo             https://montecarlo.hostingradio.ru/montecarlo128.mp3
+    Jazz FM                 https://nashe1.hostingradio.ru/jazz-128.mp3
+    SomaFM Groove Salad     https://ice1.somafm.com/groovesalad-128-mp3
+    SomaFM Drone Zone       https://ice1.somafm.com/dronezone-128-mp3
+    SomaFM Secret Agent     https://ice1.somafm.com/secretagent-128-mp3
+
+
