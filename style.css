@@ -39,19 +39,20 @@
 }
 
 /* Размытие обоев запекается прямо в картинку при добавлении (canvas blur в
-   app.js, константа BG_BLUR). Слой выпущен на 100px за края экрана
-   (явные top/left/right/bottom: -100px вместо shorthand inset — его не
-   понимают браузеры до Chrome 87) — страховка от «отставания» фиксированного
-   фона при быстром скролле и оверскролле на телефонах. Обои размыты ВСЕГДА:
-   и в эко-режиме, и на мобильных.
+   app.js, константа BG_BLUR). На десктопе слой занимает ровно видимую
+   область без выпуска за края. Выпуск 100px за края экрана включается
+   только для планшетов и смартфонов в медиазапросе ниже — там он страхует
+   от «отставания» фиксированного фона при быстром скролле и оверскролле.
+   Явные top/left/right/bottom используются вместо shorthand inset — его не
+   понимают браузеры до Chrome 87.
    ВАЖНО: отрицательный z-index обязателен — без него слой рисуется поверх
    статичного контента (виджетов и кнопок). Без transform/will-change —
    с ними слой на отдельном GPU-слое мог игнорировать порядок отрисовки */
-#bg-layer { position: fixed; top: -100px; left: -100px; right: -100px; bottom: -100px; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; transition: opacity 0.5s ease; }
+#bg-layer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; transition: opacity 0.5s ease; }
 /* Тонирующий слой под тему: накладывает var(--bg) поверх обоев — в тёмной
    теме они затемняются, в светлой выбеливаются. Opacity 0.8 — обои едва
    просвечивают, фон спокойный и читаемый */
-#bg-blur { position: fixed; top: -100px; left: -100px; right: -100px; bottom: -100px; z-index: -1; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); }
+#bg-blur { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); }
 
 .color-switcher { display: flex; align-items: center; margin-left: 10px; padding: 0 5px; }
 /* Отступы через margin вместо flex gap — работает даже на старых движках
@@ -589,6 +590,16 @@ body.eco-active *:active {
        GPU он тяжёл. Размытие обоев не трогаем: оно запечено в саму картинку
        при загрузке (см. #bg-layer) */
     *, *::before, *::after { backdrop-filter: none !important; }
+
+    /* Планшеты и смартфоны: выпускаем фон на 100px за края экрана,
+       чтобы при быстром скролле и оверскролле не было щелей */
+    #bg-layer,
+    #bg-blur {
+        top: -100px;
+        left: -100px;
+        right: -100px;
+        bottom: -100px;
+    }
 
     .info-panel { grid-template-columns: repeat(2, 1fr); }
     .weather-section, .notes-section { grid-column: span 2; }
