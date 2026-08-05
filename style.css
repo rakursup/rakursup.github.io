@@ -52,7 +52,7 @@
 /* Тонирующий слой под тему: накладывает var(--bg) поверх обоев — в тёмной
    теме они затемняются, в светлой выбеливаются. Opacity 0.8 — обои едва
    просвечивают, фон спокойный и читаемый */
-#bg-blur { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; background: var(--bg); opacity: 0.8; transition: background-color var(--transition); }
+#bg-blur { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; background: var(--bg); opacity: 0.5; transition: background-color var(--transition); }
 
 .color-switcher { display: flex; align-items: center; margin-left: 10px; padding: 0 5px; }
 /* Отступы через margin вместо flex gap — работает даже на старых движках
@@ -220,8 +220,8 @@ body.editing .card-drag-handle { display: flex; }
 .link-ghost { opacity: 0.4; }
 
 .info-panel { max-width: 1200px; margin: 50px auto 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
-.panel-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-md); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
-.panel-block:hover { transform: translateY(-2px); border-color: var(--accent); }
+.panel-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-md); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background-color 0.2s; display: flex; flex-direction: column; }
+.panel-block:hover { transform: translateY(-2px); border-color: var(--accent); background: var(--card-hover); }
 .panel-title { text-align: center; color: var(--text); font-size: 0.85rem; font-weight: 700; margin-bottom: 16px; letter-spacing: 1.5px; text-transform: uppercase; width: 100%; flex-shrink: 0; }
 .weather-section > .panel-title, .currency-section > .panel-title, .radio-section > .panel-title, .pomodoro-section > .panel-title { border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 
