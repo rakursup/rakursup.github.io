@@ -23,8 +23,11 @@ function updateCounter() {
   }
 }
 
-// Сохраняет заметки с задержкой 500мс (чтобы не писать при каждом нажатии клавиши)
+// Сохраняет заметки с задержкой 500мс (чтобы не писать при каждом нажатии клавиши).
+// Во время глобального сброса запись блокируется флагом __dashboardResetInProgress.
 const debouncedSaveNotes = debounce(() => {
+  if (window.__dashboardResetInProgress) return;
+
   safeSetItem(NOTES_KEY, notesInput.value);
   notesStatus.textContent = 'Сохранено';
   notesStatus.classList.remove('saving');
