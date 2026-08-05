@@ -49,12 +49,26 @@ const pomoTimeEl = document.getElementById('pomo-time');
 const pomoBarEl = document.getElementById('pomo-bar');
 const pomoStartBtn = document.getElementById('pomo-start');
 const pomoResetBtn = document.getElementById('pomo-reset');
-const pomoDots = [
-    document.getElementById('dot-1'),
-    document.getElementById('dot-2'),
-    document.getElementById('dot-3'),
-    document.getElementById('dot-4')
-];
+
+// Контейнер для точек сессий. Сами точки создаются динамически
+// в renderPomoDots() по числу sessionsBeforeLong (максимум 10).
+const pomoSessionsEl = document.getElementById('pomo-sessions');
+let pomoDots = [];
+
+// Создаёт точки сессий по текущему числу sessionsBeforeLong
+function renderPomoDots() {
+    pomoSessionsEl.innerHTML = '';
+    pomoDots = [];
+
+    const count = Math.min(pomoSettings.sessionsBeforeLong, 10);
+
+    for (let i = 0; i < count; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'pomo-session-dot';
+        pomoSessionsEl.appendChild(dot);
+        pomoDots.push(dot);
+    }
+}
 
 let pomoState = {
     mode: 'work',
@@ -125,12 +139,25 @@ function updatePomoDisplay() {
     pomoStartBtn.textContent = pomoState.running ? '⏸ Пауза' : '▶ Старт';
     pomoStartBtn.classList.toggle('running', pomoState.running);
 
-    const visibleDots = Math.min(pomoSettings.sessionsBeforeLong, pomoDots.length);
+    // Если количество сессий изменилось, пересоздаём точки
+    const neededDots = Math.min(pomoSettings.sessionsBeforeLong, 10);
+    if (pomoDots.length !== neededDots) {
+        renderPomoDots();
+    }
+
+    // Защита от некорректного числа завершённых сессий
+    const completed = Math.min(pomoState.completedSessions, pomoDots.length);
+
     pomoDots.forEach((dot, i) => {
         dot.classList.remove('completed', 'active');
-        dot.style.display = i < visibleDots ? 'inline-block' : 'none';
-        if (i < pomoState.completedSessions) dot.classList.add('completed');
-        if (i === pomoState.completedSessions && pomoState.mode === 'work') dot.classList.add('active');
+
+        if (i < completed) {
+            dot.classList.add('completed');
+        }
+
+        if (i === completed && pomoState.mode === 'work') {
+            dot.classList.add('active');
+        }
     });
 
     document.title = pomoState.running
@@ -233,6 +260,7 @@ window.addEventListener('beforeunload', () => {
 });
 
 // Инициализация
+renderPomoDots();
 loadPomoState();
 updatePomoDisplay();
 
@@ -293,6 +321,12 @@ function savePomoSettingsFromEditor() {
         sessionsBeforeLong: values['pomo-sessions-before-long']
     };
     savePomoSettings(pomoSettings);
+
+    // Если текущий счётчик сессий выходит за новый лимит,
+    // ограничиваем его диапазоном индикаторов
+    if (pomoState.completedSessions >= pomoSettings.sessionsBeforeLong) {
+        pomoState.completedSessions = Math.max(0, pomoSettings.sessionsBeforeLong - 1);
+    }
 
     if (!pomoState.running) {
         pomoState.mode = 'work';
