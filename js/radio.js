@@ -7,6 +7,10 @@ const MAX_STATIONS = 7;
 const MAX_STATION_NAME_LENGTH = 20;
 const MAX_STATION_URL_LENGTH = 300;
 
+// Повторные попытки подключения к текущей станции перед автопереключением
+const MAX_STREAM_RETRIES = 3;
+const STREAM_RETRY_DELAY = 5000;
+
 // Загружает станции из localStorage (или пустой массив по умолчанию)
 function loadRadioStations() {
     try {
@@ -33,17 +37,21 @@ function saveRadioStations(stations) {
 let RADIO_STATIONS = loadRadioStations();
 
 let currentStation = 0, isPlaying = false, errorRetryTimer = null, consecutiveErrors = 0;
+let streamRetries = 0; // счётчик повторных попыток подключения к текущей станции
 
 // Переименована (isRadioEco), чтобы не конфликтовать с app.js:
-// в eco-режиме отключаем автопереключение станций при ошибках (экономим трафик)
+// в eco-режиме отключаем автопереключение и повторные попытки при ошибках (экономим трафик)
 let isRadioEco = document.body.classList.contains('eco-active');
 
 // Слушаем переключение режима из app.js
 window.addEventListener('ecomode-changed', (e) => {
     isRadioEco = e.detail.enabled;
-    if (isRadioEco && errorRetryTimer) {
-        clearTimeout(errorRetryTimer);
-        errorRetryTimer = null;
+    if (isRadioEco) {
+        if (errorRetryTimer) {
+            clearTimeout(errorRetryTimer);
+            errorRetryTimer = null;
+        }
+        streamRetries = 0;
     }
 });
 
@@ -112,6 +120,7 @@ function hideError() { errorEl.style.display = 'none'; errorEl.textContent = '';
 // Останавливает радио
 function stopRadio() {
     clearTimeout(errorRetryTimer);
+    streamRetries = 0;
     audioEl.pause();
     audioEl.removeAttribute('src');
     audioEl.load();
@@ -136,6 +145,7 @@ function playCurrentStation() {
         playPromise.then(() => {
             isPlaying = true;
             consecutiveErrors = 0;
+            streamRetries = 0;
             updatePlayButton();
         }).catch(err => {
             if (err.name === 'NotAllowedError') {
@@ -152,10 +162,11 @@ function playCurrentStation() {
     saveRadioState();
 }
 
-// Обработчик ошибок потока
+// Обработчик ошибок потока.
+// Сначала делает MAX_STREAM_RETRIES попытки перезапустить текущую станцию
+// с интервалом STREAM_RETRY_DELAY, затем автопереключается на следующую.
 function handleStreamError() {
     if (!audioEl.getAttribute('src')) return;
-    consecutiveErrors++;
 
     if (isRadioEco) {
         showError('Поток недоступен. Переключите станцию вручную.');
@@ -163,11 +174,24 @@ function handleStreamError() {
         return;
     }
 
+    if (streamRetries < MAX_STREAM_RETRIES) {
+        streamRetries++;
+        showError(`Поток недоступен. Повторное подключение... (${streamRetries}/${MAX_STREAM_RETRIES})`);
+        errorRetryTimer = setTimeout(() => {
+            playCurrentStation();
+        }, STREAM_RETRY_DELAY);
+        return;
+    }
+
+    streamRetries = 0;
+    consecutiveErrors++;
+
     if (consecutiveErrors >= RADIO_STATIONS.length) {
         showError('Все станции недоступны');
         stopRadio();
         return;
     }
+
     showError(`Ошибка потока. Переключение... (${consecutiveErrors}/${RADIO_STATIONS.length})`);
     errorRetryTimer = setTimeout(() => {
         currentStation = (currentStation + 1) % RADIO_STATIONS.length;
@@ -181,13 +205,14 @@ function togglePlay() {
         return;
     }
     if (isPlaying) stopRadio();
-    else { consecutiveErrors = 0; playCurrentStation(); }
+    else { consecutiveErrors = 0; streamRetries = 0; playCurrentStation(); }
 }
 
 function switchStation(delta) {
     if (RADIO_STATIONS.length === 0) return;
     clearTimeout(errorRetryTimer);
     consecutiveErrors = 0;
+    streamRetries = 0;
     currentStation = ((currentStation + delta) % RADIO_STATIONS.length + RADIO_STATIONS.length) % RADIO_STATIONS.length;
     stationName.textContent = RADIO_STATIONS[currentStation].name;
     saveRadioState();
@@ -203,7 +228,7 @@ volumeSlider.addEventListener('input', function() { audioEl.volume = this.value 
 audioEl.addEventListener('error', handleStreamError);
 audioEl.addEventListener('stalled', () => { if (isPlaying) equalizer.classList.add('active'); });
 audioEl.addEventListener('waiting', () => { if (isPlaying) equalizer.classList.add('active'); });
-audioEl.addEventListener('playing', () => { hideError(); isPlaying = true; consecutiveErrors = 0; updatePlayButton(); });
+audioEl.addEventListener('playing', () => { hideError(); isPlaying = true; consecutiveErrors = 0; streamRetries = 0; updatePlayButton(); });
 
 // ===== РЕДАКТОР РАДИОСТАНЦИЙ =====
 const radioEditToggle = document.getElementById('radio-edit-toggle');
