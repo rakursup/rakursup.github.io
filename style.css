@@ -407,8 +407,10 @@ body.editing .card-drag-handle { display: flex; }
 /* Кнопки перелистывания календаря: прозрачный фон, чтобы не было второго
    полупрозрачного слоя поверх блока */
 .calendar-header button { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
-.calendar-header button:hover { background: var(--accent); color: white; }
-#cal-current-month-year { font-weight: 600; color: var(--text); font-feature-settings: 'ss01'; letter-spacing: -0.01em; }
+.calendar-header button:hover {
+    border-color: var(--accent);
+    background: rgba(128, 128, 128, 0.08);
+}#cal-current-month-year { font-weight: 600; color: var(--text); font-feature-settings: 'ss01'; letter-spacing: -0.01em; }
 .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.8rem; color: var(--text-muted); text-align: center; font-weight: 500; }
 .calendar-weekdays span { padding: 4px 0; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; flex: 0 0 auto; }
