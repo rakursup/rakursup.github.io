@@ -489,7 +489,7 @@ body.editing .card-drag-handle { display: flex; }
 .pomo-start.running { background: var(--danger); border-color: var(--danger); }
 .pomo-start.running:hover { background: #b71c1c; border-color: #b71c1c; }
 .pomo-reset { background: transparent; color: var(--text-muted); }
-.pomo-reset:hover { background: var(--weather-bg); color: var(--text); border-color: var(--accent); }
+.pomo-reset:hover { background: rgba(128, 128, 128, 0.08); color: var(--text); border-color: var(--accent); }
 .pomodoro-sessions { display: flex; align-items: center; }
 .pomodoro-sessions > * + * { margin-left: 8px; }
 .pomo-session-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: background-color 0.3s, transform 0.2s; }
