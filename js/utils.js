@@ -130,10 +130,13 @@ function escapeHtml(text) {
     return d.innerHTML;
 }
 
-// Проверяет, что URL безопасный (разрешены только http, https, mailto).
+// Проверяет, что URL безопасный.
+// Разрешены http, https, mailto и file:/// для локальных файлов.
 // Блокирует опасные схемы javascript: и data: (например, javascript:alert(1)).
 // Если протокол не указан (ya.ru, www.site.com), добавляет https:// — иначе
-// браузер сочтёт ссылку относительной и будет вести на 404 на текущем домене
+// браузер сочтёт ссылку относительной и будет вести на 404 на текущем домене.
+// Примечание: file:/// ссылки обычно работают в локальной копии дашборда,
+// но могут блокироваться браузером на https-сайте (GitHub Pages).
 function sanitizeUrl(url) {
     if (!url) return '#';
     let trimmed = url.trim();
@@ -147,7 +150,7 @@ function sanitizeUrl(url) {
     }
     try {
         const p = new URL(trimmed);
-        return ['https:', 'http:', 'mailto:'].includes(p.protocol) ? trimmed : '#';
+        return ['https:', 'http:', 'mailto:', 'file:'].includes(p.protocol) ? trimmed : '#';
     } catch { return '#'; }
 }
 
