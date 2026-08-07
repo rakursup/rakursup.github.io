@@ -273,17 +273,19 @@ body.editing .card-drag-handle { display: flex; }
 @keyframes weather-spin { to { transform: rotate(-360deg); } }
 
 /* ── Селект выбора города в блоке погоды ──
-   Компактная версия кастомного селекта поисковика */
+   Компактная версия кастомного селекта поисковика.
+   Фон триггера прозрачный: элемент лежит внутри блока с var(--card-bg),
+   иначе полупрозрачные слои складывались бы и кнопка выглядела плотнее */
 .weather-city-select { position: relative; width: 100%; }
 .weather-city-trigger {
     display: flex; align-items: center; justify-content: center;
-    background: var(--select-bg); border: 1px solid var(--border);
+    background: transparent; border: 1px solid var(--border);
     border-radius: 8px; padding: 5px 10px; cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
     width: 100%; overflow: hidden;
 }
 .weather-city-trigger > * + * { margin-left: 6px; }
-.weather-city-trigger:hover { border-color: var(--accent); background: var(--card-hover); }
+.weather-city-trigger:hover { border-color: var(--accent); background: rgba(128, 128, 128, 0.08); }
 .weather-city-trigger .arrow-down {
     width: 0; height: 0;
     border-left: 4px solid transparent; border-right: 4px solid transparent;
@@ -350,8 +352,10 @@ body.editing .card-drag-handle { display: flex; }
 .radio-station-name { font-size: 0.95rem; font-weight: 600; color: var(--text); text-align: center; }
 .radio-controls { display: flex; align-items: center; }
 .radio-controls > * + * { margin-left: 12px; }
-.radio-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-.radio-btn:hover { border-color: var(--accent); background: var(--weather-bg); }
+/* Кнопки переключения радио: прозрачный фон, чтобы не было второго
+   полупрозрачного слоя поверх блока */
+.radio-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.radio-btn:hover { border-color: var(--accent); background: rgba(128, 128, 128, 0.08); }
 .radio-btn svg { width: 18px; height: 18px; fill: currentColor; }
 .radio-btn.play-btn { width: 48px; height: 48px; background: var(--accent); color: #fff; border-color: var(--accent); }
 .radio-btn.play-btn:hover { background: var(--accent-hover); }
@@ -400,7 +404,9 @@ body.editing .card-drag-handle { display: flex; }
 .calendar-container { display: flex; flex-direction: column; flex: 0 0 auto; justify-content: flex-start; }
 .calendar-container > * + * { margin-top: 12px; }
 .calendar-header { display: flex; align-items: center; justify-content: space-between; }
-.calendar-header button { background: var(--bg-secondary); color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+/* Кнопки перелистывания календаря: прозрачный фон, чтобы не было второго
+   полупрозрачного слоя поверх блока */
+.calendar-header button { background: transparent; color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer; transition: all 0.2s; font-size: 1rem; }
 .calendar-header button:hover { background: var(--accent); color: white; }
 #cal-current-month-year { font-weight: 600; color: var(--text); font-feature-settings: 'ss01'; letter-spacing: -0.01em; }
 .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.8rem; color: var(--text-muted); text-align: center; font-weight: 500; }
@@ -559,9 +565,10 @@ body.eco-active * {
     backdrop-filter: none !important;
 }
 
-/* В эко-режиме блоки и поиск становятся полностью непрозрачными — размытые
-   обои не просвечивают, элементы выглядят «резкими», а GPU не тратит силы
-   на смешивание полупрозрачных слоёв */
+/* В эко-режиме блоки, поиск, выпадающие списки и кнопки управления
+   становятся полностью непрозрачными — размытые обои не просвечивают,
+   элементы выглядят «резкими», а GPU не тратит силы на смешивание
+   полупрозрачных слоёв */
 body.eco-active .card,
 body.eco-active .panel-block,
 body.eco-active .btn-add-card,
@@ -569,7 +576,9 @@ body.eco-active .search-box,
 body.eco-active .custom-select-trigger,
 body.eco-active .custom-options,
 body.eco-active .weather-city-trigger,
-body.eco-active .weather-city-options {
+body.eco-active .weather-city-options,
+body.eco-active .radio-btn:not(.play-btn),
+body.eco-active .calendar-header button {
     background: var(--bg-secondary);
 }
 
