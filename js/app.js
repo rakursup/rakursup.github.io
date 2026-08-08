@@ -390,7 +390,7 @@ const searchEngines = {
     'yandex': { name: 'Яндекс', url: 'https://yandex.ru/search/?text=' },
     'google': { name: 'Google', url: 'https://www.google.com/search?q=' },
     'ddg': { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
-    'shodan': { name: 'Shodan (IoT)', url: 'https://www.shodan.io/search?query=' }
+    'shodan': { name: 'Shodan', url: 'https://www.shodan.io/search?query=' }
 };
 
 let currentSearchEngine = localStorage.getItem(ENGINE_KEY) || 'yandex';
