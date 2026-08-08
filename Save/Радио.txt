@@ -8,11 +8,19 @@
 // mp3/aac по HTTPS, играют в любом браузере без mixed content.
 
     Relax FM                https://hls-01-gpm.hostingradio.ru/relaxfm495/playlist.m3u8
-    Record Chill            https://radiorecord.hostingradio.ru/chil96.aacp
+    Record Chill-Out        https://radiorecord.hostingradio.ru/chil96.aacp
     Monte Carlo             https://montecarlo.hostingradio.ru/montecarlo128.mp3
     Jazz FM                 https://nashe1.hostingradio.ru/jazz-128.mp3
     SomaFM Groove Salad     https://ice1.somafm.com/groovesalad-128-mp3
     SomaFM Drone Zone       https://ice1.somafm.com/dronezone-128-mp3
     SomaFM Secret Agent     https://ice1.somafm.com/secretagent-128-mp3
 
+Новые для тестирования
+----------
+
+    Coffee FM                   https://stream.pcradio.ru/Vintazh_kafe-med
+    Relax FM 90,8 Moscow        http://pub0302.101.ru:8000/stream/trust/mp3/128/264
+    Radio Record Chill House    https://radiorecord.hostingradio.ru/organic96.aacp
+    Европа Плюс mp3             http://ep256.hostingradio.ru:8052/europaplus256.mp3
+    Европа Плюс hls             http://hls-02-europaplus.emgsound.ru/11/playlist.m3u8
 ***

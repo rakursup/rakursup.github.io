@@ -4,7 +4,7 @@
 // Ключ для хранения станций в localStorage (с префиксом экземпляра)
 const RADIO_STATIONS_KEY = storageKey('radio_stations');
 const MAX_STATIONS = 7;
-const MAX_STATION_NAME_LENGTH = 20;
+const MAX_STATION_NAME_LENGTH = 25;
 const MAX_STATION_URL_LENGTH = 300;
 
 // Повторные попытки подключения к текущей станции перед автопереключением
