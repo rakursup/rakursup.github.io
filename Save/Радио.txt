@@ -7,6 +7,12 @@
 // автопереключением. Остальные станции — прямые потоки
 // mp3/aac по HTTPS, играют в любом браузере без mixed content.
 
+Важно!
+----------
+- для прослушивания с https://rakursup.github.io/ используйте ссылки с https://
+- для прослушивания с локальной версии можно и http:// и https://
+- так же обращайте внимание на формат: .m3u8 .aacp .mp3
+
     Relax FM                https://hls-01-gpm.hostingradio.ru/relaxfm495/playlist.m3u8
     Record Chill-Out        https://radiorecord.hostingradio.ru/chil96.aacp
     Monte Carlo             https://montecarlo.hostingradio.ru/montecarlo128.mp3
@@ -23,4 +29,10 @@
     Radio Record Chill House    https://radiorecord.hostingradio.ru/organic96.aacp
     Европа Плюс mp3             http://ep256.hostingradio.ru:8052/europaplus256.mp3
     Европа Плюс hls             http://hls-02-europaplus.emgsound.ru/11/playlist.m3u8
+    Маруся ФМ                   https://radio-holding.ru:9433/marusya_default
+    Радио Дача                  http://listen13.vdfm.ru:8000/dacha
+    Русское Радио aacp          https://rusradio.hostingradio.ru/rusradio96.aacp
+    Русское Радио mp3           https://rusradio.hostingradio.ru/rusradio128.mp3
+    Ретро FM                    http://retroserver.streamr.ru:8043/retro256.mp3
+
 ***
