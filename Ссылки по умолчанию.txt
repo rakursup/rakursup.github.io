@@ -1,0 +1,110 @@
+📧 Почта
+
+Яндекс Почта      https://mail.yandex.ru/
+Gmail             https://gmail.com/
+Mail.ru           https://e.mail.ru/
+Рамблер/почта     https://mail.rambler.ru/
+Outlook           https://outlook.live.com/
+
+
+📚 Читальный зал
+
+📕 Author.Today   https://author.today/
+📘 Литрес         https://www.litres.ru/
+📙 Литнет         https://litnet.com/
+🎧️ Книга в ухе   https://knigavuhe.org/
+📑 Самиздат       http://samlib.ru/
+
+
+📺 Видео & Стримы
+
+YouTube           https://youtube.com/
+Twitch            https://twitch.tv/
+Rutube            https://rutube.ru/
+VK Видео          https://vkvideo.ru/
+Kick              https://kick.com/
+
+
+🎬 Кино & Сериалы
+
+Кинопоиск         https://hd.kinopoisk.ru/
+IVI               https://www.ivi.ru/
+Okko              https://okko.ru/
+Premier           https://premier.one/
+Wink              https://wink.ru/
+
+
+🛒 Товары & Маркеты
+
+Яндекс Маркет     https://market.yandex.ru/
+Wildberries       https://www.wildberries.ru/
+Ozon              https://www.ozon.ru/
+AliExpress        https://aliexpress.ru/
+DNS               https://www.dns-shop.ru/
+
+
+🏛️ Услуги & Сервисы
+
+Госуслуги         https://gosuslugi.ru/
+Авиасейлс         https://www.aviasales.ru/
+Tutu.ru           https://tutu.ru/
+Сравни.ру         https://sravni.ru/
+YouDo             https://youdo.com/
+
+
+🗺️ Карты & Навигация
+
+Яндекс Карты      https://yandex.ru/maps/
+2ГИС              https://2gis.ru/
+Google Maps       https://www.google.com/maps
+OpenStreetMap     https://www.openstreetmap.org/
+Maps.me           https://maps.me/
+
+
+📰 Новости & Инфо
+
+ТАСС              https://tass.ru/
+Дзен              https://yandex.ru/
+Хабр              https://habr.com/
+4PDA              https://4pda.to/
+iXBT              https://www.ixbt.com/
+
+
+🛠️ Инструменты
+
+Яндекс Переводчик https://translate.yandex.ru/
+Google Translate  https://translate.google.com/
+PROMT.One         https://www.translate.ru
+Конвертер         https://www.online-convert.com/ru
+Калькулятор       https://calcus.ru/
+PDF24 Tools       https://tools.pdf24.org/ru/
+
+
+💻 Разработка
+
+GitHub            https://github.com/
+Stack Overflow    https://stackoverflow.com/
+ChatGPT           https://chat.openai.com/
+MDN Web Docs      https://developer.mozilla.org/
+Docker Hub        https://hub.docker.com/
+CodePen           https://codepen.io/
+
+
+☁️ Облака
+
+Яндекс Диск       https://disk.yandex.ru/
+Google Drive      https://drive.google.com/
+Облако Mail.ru    https://cloud.mail.ru/
+Dropbox           https://www.dropbox.com/
+MEGA              https://mega.nz/
+OneDrive          https://onedrive.live.com/
+
+
+🤖 ИИ-чаты
+
+Qwen AI           https://chat.qwen.ai/
+ChatGPT           https://chat.openai.com/
+Яндекс Алиса      https://alice.yandex.ru/
+Grok AI           https://grok.com/
+Gemini            https://gemini.google.com/
+Claude AI         https://claude.ai/
